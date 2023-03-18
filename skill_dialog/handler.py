@@ -38,9 +38,8 @@ class DialogHandler:
         if not self.user_exists:
             print('new')
 
-        match self.session_state:
-            case 1: self.main_menu()
-            case 2: self.process_command()
+        if self.session_state == 1: self.main_menu()
+        elif self.process_command() == 2: self.process_command()
 
     def process_command(self):
         """ Обработка команды пользователя """
