@@ -48,20 +48,19 @@ class DialogHandler:
             self.command_not_found()
             return
 
-        match self.command:
-            case 'about':
+        if self.command == 'about':
                 text = ABOUT_TEXT
                 buttons = MAIN_MENU_BUTTONS
                 self.result = Response(text, buttons, session_state=2)
 
-            case 'checkin':
+        elif self.command == 'checkin':
                 text = 'Отметка сделана!'
                 buttons = MAIN_MENU_BUTTONS
 
                 write_checkin(self.__user_id, self.timezone)
                 self.result = Response(text, buttons, session_state=2)
 
-            case 'statistic':
+        elif self.command == 'statistic':
                 checkins = read_checkins(self.__user_id)
                 text = ''
                 buttons = MAIN_MENU_BUTTONS
