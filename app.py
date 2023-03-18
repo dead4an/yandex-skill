@@ -6,7 +6,7 @@ from skill_dialog.handler import DialogHandler
 app = Flask(__name__)
 
 
-@app.route('/', methods=['POST', 'GET'])
+@app.route('/', methods=['POST'])
 def main():
     """ Точка входа в приложение """
     # Обработка запроса
