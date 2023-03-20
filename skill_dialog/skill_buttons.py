@@ -1,34 +1,36 @@
+DOMEN = 'https://208b-83-220-238-177.eu.ngrok.io'
+
 # Кнопки навыка
 SKILL_BUTTONS = {
     # About
-    'about': {
+    'help': {
         'title': 'Помощь \U0001F4D6',
-        'payload': ['about'],
+        'payload': ['help'],
         'hide': False
     },
-    'info': {
+    'about_skill': {
         'title': 'О навыке',
-        'payload': ['info'],
+        'payload': ['about_skill'],
         'hide': False
     },
-    'how_checkin': {
+    'about_activities': {
         'title': 'Об отметках',
-        'payload': ['how_checkin'],
+        'payload': ['about_activities'],
         'hide': False
     },
-    'how_statistic': {
+    'about_statistic': {
         'title': 'О статистике',
-        'payload': ['how_statistic'],
+        'payload': ['about_statistic'],
         'hide': False
     },
 
     # Checkin
-    'checkin': {
+    'activities': {
         'title': 'Отметки \U00002705',
-        'payload': ['checkin'],
+        'payload': ['activities'],
         'hide': False
     },
-    'create_checkin': {
+    'create_activity': {
         'title': 'Отметиться',
         'payload': ['checkin'],
         'hide': False
@@ -41,30 +43,42 @@ SKILL_BUTTONS = {
         'hide': False
     },
 
-    # Other
+    # Hello
     'hello_new': {
         'title': 'Поехали \U0001F525',
-        'payload': ['поехали'],
+        'payload': ['yes'],
         'hide': False
     },
-    'hello': {
-        'title': 'C возвращением! Что займёмся в этот раз?',
-        'payload': ['поехали'],
+
+    'back': {
+        'title': 'Назад',
+        'payload': ['back'],
         'hide': False
     }
 }
 
-MAIN_MENU_BUTTONS = [
-    SKILL_BUTTONS['about'],
-    SKILL_BUTTONS['checkin'],
-    SKILL_BUTTONS['statistic']
-]
 
-ABOUT_BUTTONS = [
-    
-]
-
-HELLO_BUTTONS = {
-    'hello_new': [SKILL_BUTTONS['hello_new']],
-    'hello': [SKILL_BUTTONS['hello']]
+CARDS = {
+    'card': {
+        'type': 'BigImage',
+        'image_id': '937455/659419eb30947371c9e1',
+        'title': 'Ваша статистика готова!',
+        'button': {
+            'text': 'Посмотреть статистику',
+            'url': f'{DOMEN}/statistic',
+        },
+    }
 }
+
+MAIN_MENU_BUTTONS = [
+    SKILL_BUTTONS['activities'],
+    SKILL_BUTTONS['statistic'],
+    SKILL_BUTTONS['help']
+]
+
+HELP_BUTTONS = [
+    SKILL_BUTTONS['about_skill'],
+    SKILL_BUTTONS['about_activities'],
+    SKILL_BUTTONS['about_statistic'],
+    SKILL_BUTTONS['back']
+]

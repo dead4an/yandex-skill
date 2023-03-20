@@ -1,4 +1,4 @@
-from skill_dialog.nlu import classify_command
+from skill_dialog.nlu import classify_command, METRICS
 
 
 class Request:
@@ -6,7 +6,7 @@ class Request:
         self.request = request
         self.user_id = request['session']['user']['user_id']
         self.command = ''
-        self.new = request['session']['new']
+        self.session_is_new = request['session']['new']
         self.session_state = 0
         self.timezone = request['meta']['timezone']
 
@@ -28,7 +28,12 @@ class Request:
             return
 
         nlu_tokens = self.request['request']['nlu']['tokens']
-        self.command = classify_command(nlu_tokens)
+        if self.session_state == 1:
+            self.command = classify_command(nlu_tokens, METRICS['main_menu'])
+
+        elif self.session_state == 2:
+            self.command = classify_command(nlu_tokens, METRICS['help'])
+
 
     def get_user_id(self):
         """ Возвращает id пользователя """
@@ -40,7 +45,7 @@ class Request:
 
     def get_session_info(self) -> int and bool:
         """ Возвращает сведения о состоянии сессии """
-        return self.session_state, self.new
+        return self.session_state, self.session_is_new
 
     def get_timezone(self):
         return self.timezone

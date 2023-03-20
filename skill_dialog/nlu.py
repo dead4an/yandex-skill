@@ -1,43 +1,78 @@
 # Словарь для классификации запроса (cheap-NLP)
 # Работает с токенами из запроса
 command_classifier_dict = {
-    'about': {
+    # Главное меню
+    'help': {
         'навык', 'навыке', 'о', 'расскажи', 'гайд', 'научи', 'инструкция'
         'информация', 'help', 'помощь', 'как', 'пользоваться',
-        'использовать', 'навыком', 'мне', 'почему', 'не'
+        'использовать', 'навыком', 'мне', 'почему'
     },
-    'checkin': {
+    'activities': {
         'отметка',  'отметку', 'отметиться', 'засечь', 'время',
-        'сделать', 'начать', 'запиши', 'записать',
-        'отмечай', 'отметь', 'засеки', 'добавить', 'отметки'
+        'сделать', 'запиши', 'записать', 'отслеживать', 'отмечай',
+        'отметь', 'засеки', 'добавить', 'отметки', 'активность',
+        'активности', 'новая', 'новую', 'добавь', 'activities'
     },
     'statistic': {
         'статистика', 'статистику', 'график', 'диаграмма', 'гистограмма',
         'моя', 'мою', 'посмотреть', 'узнать', 'поделись', 'покажи',
-        'показать', 'показывай'
+        'показать', 'показывай', 'statistic'
+    },
+
+    # Подразделы помощи
+    'about_skill': {
+        'навык', 'навыке', 'умение', 'общая', 'общих',
+        'зачем', 'about_skill', 'навыком', 'навыки'
+    },
+
+    'about_activities': {
+        'отметки', 'активности', 'отметках', 'активностях',
+        'about_activities', 'активностью', 'активность',
+        'активный'
+    },
+
+    'about_statistic': {
+        'статистика', 'статистике', 'результаты', 'итоги',
+        'визуализация', 'about_statistic', 'статистику',
+        'статистики'
+    },
+
+    # Подтверждение
+    'yes': {
+        'да', 'ага', 'начать', 'начнём', 'давай', 'вперёд',
+        'именно', 'продолжи', 'продолжай', 'угу', 'так',
+        'согласен', 'согласна', 'поехали', 'yes'
+    },
+    'no': {
+        'нет', 'не-а', 'не', 'отмени', 'отмена', 'верни',
+        'стой', 'стоп', 'подожди', 'потом', 'никак', 'no'
+    },
+
+    # Назад
+    'back': {
+        'вернуться', 'назад', 'отменить', 'отмени', 'верни',
+        'отмена', 'предыдущий', 'back'
+    },
+    
+    'back_to_menu': {
+        'главное', 'меню', 'в'
     }
 }
 
+METRICS = {
+    'main_menu': ['yes', 'no', 'help', 'activities', 'statistic'],
+    'help': ['about_skill', 'about_activities', 
+             'about_statistic', 'back', 'back_to_menu']
+}
 
-def classify_command(tokens: list) -> str:
-    counter = {
-        'about': 0, 'checkin': 0, 'statistic': 0
-    }
 
-    for token in tokens:
-        if token in command_classifier_dict['about']:
-            counter['about'] += 1
-            continue
+def classify_command(tokens: list, metrics: list):
+    counter = {key: 0 for key in metrics}
+    for metric in metrics:
+        for token in tokens:
+            if token in command_classifier_dict[metric]:
+                counter[metric] += 1
 
-        if token in command_classifier_dict['checkin']:
-            counter['checkin'] += 1
-            continue
-
-        if token in command_classifier_dict['statistic']:
-            counter['statistic'] += 1
-
-    counted = list(sorted(counter.items(), key=lambda x: x[1]))
-    if counted[-1][1] == 0:
-        return 'none'
-
-    return counted[-1][0]
+    counter = list(sorted(counter.items(), key=lambda x: x[1]))
+    if counter[-1][1]: return counter[-1][0]
+    return 'none'
