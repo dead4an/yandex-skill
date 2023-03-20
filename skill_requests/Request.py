@@ -16,7 +16,7 @@ class Request:
     def init_session_state(self) -> None:
         """ Инициализирует состояние сессии """
         if 'value' not in self.request['state']['session']:
-            self.session_state = 0
+            self.session_state = 1
             return
 
         self.session_state = self.request['state']['session']['value']
@@ -32,6 +32,9 @@ class Request:
             self.command = classify_command(nlu_tokens, METRICS['main_menu'])
 
         elif self.session_state == 2:
+            self.command = classify_command(nlu_tokens, METRICS['activity_types'])
+
+        elif self.session_state == 4:
             self.command = classify_command(nlu_tokens, METRICS['help'])
 
 

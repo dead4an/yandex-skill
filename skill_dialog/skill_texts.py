@@ -8,6 +8,9 @@ HELLO_TEXT_STD = [
     "Привет! Начать отслеживать активность или показать вам статистику?"
 ]
 
+ACTIVITIES = "Вы можете начать отслеживать следующие типы активностей: Работа, Домашние " \
+             "Дела, Хобби, Спорт, Прочее. Назовите тип активности, а всё остальное сделаю я!"
+
 GENERAL_HELP = "Я могу рассказать вам о навыке, активностях или статистике. " \
                "О чём именно вы хотите узнать?"
 
@@ -39,11 +42,16 @@ ABOUT_STATISTIC = "Наверняка вам захочется посмотре
                   "даже сможет дать краткую оценку вашей Статистике, предложив несколько " \
                   "рекомендаций. Хотите узнать о чём-то ещё или вернёмся в главное меню?"
 
+COMMAND_NOT_FOUND = "Извините, я не знаю такой команды. Вы хотите добавить активность, " \
+                    "узнать свою статистику или вам нужна помощь?"
+
 TEXTS = {
     'hello_new': HELLO_TEXT_NEW,
     'hello_std': HELLO_TEXT_STD,
+    'activities': ACTIVITIES,
     'help': GENERAL_HELP,
     'about_skill': ABOUT_SKILL,
     'about_activities': ABOUT_ACTIVITIES,
-    'about_statistic': ABOUT_STATISTIC
+    'about_statistic': ABOUT_STATISTIC,
+    'command_not_found': COMMAND_NOT_FOUND
 }

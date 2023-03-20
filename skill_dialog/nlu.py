@@ -19,6 +19,35 @@ command_classifier_dict = {
         'показать', 'показывай', 'statistic'
     },
 
+    # Активности
+    'activity_work': {
+        'работа', 'работы', 'работу', 'работе',
+        'на'
+    },
+
+    'activity_hobby': {
+        'увлечения', 'хобби', 'интересы'
+    },
+
+    'activity_homework': {
+        'домашние', 'дом', 'дома', 'дела',
+        'по', 'дому', 'в', 'доме'
+    },
+
+    'activity_sport': {
+        'спорт', 'спортом', 'спортивную',
+        'спортивная', 'занятия', 'спорту',
+        'спорте', 'физические', 'упражнения'
+    },
+
+    'add_activity': {
+        'добавить', 'начать', 'создать', 'отметить'
+    },
+
+    'close_activity': {
+        'закончить', 'стоп', 'остановить'
+    },
+
     # Подразделы помощи
     'about_skill': {
         'навык', 'навыке', 'умение', 'общая', 'общих',
@@ -61,6 +90,8 @@ command_classifier_dict = {
 
 METRICS = {
     'main_menu': ['yes', 'no', 'help', 'activities', 'statistic'],
+    'activity_types': ['activity_work', 'activity_homework',
+                 'activity_hobby', 'activity_sport'],
     'help': ['about_skill', 'about_activities', 
              'about_statistic', 'back', 'back_to_menu']
 }

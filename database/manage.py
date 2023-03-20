@@ -1,9 +1,14 @@
 import sqlite3 as sq
 
-CREATE_TABLE_CHECKINS = "CREATE TABLE IF NOT EXISTS checkins (user_id, time, text)"
-INSERT_CHECKIN = "INSERT INTO checkins VALUES (?,?,?)"
-SELECT_CHECKINS = "SELECT time, text FROM checkins WHERE user_id=?"
+CREATE_TABLE_CHECKINS = "CREATE TABLE IF NOT EXISTS checkins (user_id, time, type, checkin_type)"
+INSERT_CHECKIN = "INSERT INTO checkins VALUES (?,?,?,?)"
+SELECT_CHECKINS = "SELECT time, checkin_type FROM checkins WHERE user_id=?"
 SELECT_ALL_CHECKINS = "SELECT * FROM checkins"
+
+CREATE_TABLE_ACTIVITIES = "CREATE TABLE IF NOT EXISTS activities (user_id, activity_id, time, activity_type)"
+INSERT_ACTIVITY = "INSERT INTO activities VALUES (?,?,?)"
+SELECT_ACTIVITIES = "SELECT time, activity_type FROM activities WHERE user_id=?"
+DELETE_ACTIVITY = "DELETE FROM activities WHERE user_id=? AND activity_id=?"
 
 CREATE_TABLE_USERS = "CREATE TABLE IF NOT EXISTS users (user_id, name, activities, timezone)"
 INSERT_USER = "INSERT INTO users VALUES (?,?,?,?)"
@@ -20,12 +25,12 @@ class DatabaseManager:
         self.cur = None
 
     # Работа с отметками
-    def insert_checkin(self, user_id, time, text):
+    def insert_checkin(self, user_id, time, type, checkin_type):
         """ Загружает отметку в базу данных """
         try:
             self.setup_connection()
             self.cur.execute(CREATE_TABLE_CHECKINS)
-            self.cur.execute(INSERT_CHECKIN, (user_id, time, text))
+            self.cur.execute(INSERT_CHECKIN, (user_id, time, type, checkin_type))
             self.con.commit()
         except Exception as _ex:
             print(f'Cannot insert checkin\n{_ex}')
