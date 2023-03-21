@@ -1,4 +1,4 @@
-DOMEN = 'https://c24d-83-220-236-141.eu.ngrok.io'
+DOMEN = 'https://40a2-83-220-236-37.eu.ngrok.io'
 
 # Кнопки навыка
 SKILL_BUTTONS = {

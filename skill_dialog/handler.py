@@ -2,7 +2,6 @@ from skill_requests.Response import Response
 from database.manage import DatabaseManager
 from .skill_buttons import SKILL_BUTTONS, MAIN_MENU_BUTTONS, HELP_BUTTONS, CARDS
 from .skill_texts import TEXTS
-import datetime
 from datetime import datetime as dt
 import pytz
 import random
@@ -43,6 +42,7 @@ class DialogHandler:
             self.command_not_found()
             return
         
+        # Главное меню
         if self.session_state == 1:
             if self.command == 'yes':
                 self.main_menu()
@@ -60,34 +60,39 @@ class DialogHandler:
                 self.activities()
 
             elif self.command == 'statistic':
-                    self.get_checkins()
+                    self.get_activities()
                     text = ''
                     buttons = MAIN_MENU_BUTTONS
-                    for row in self.checkins[:10]:
-                        text += f'Time: {row[0]} | Text: {row[1]}\n'
+                    for row in self.activities_list[:10]:
+                        text += f'Type: {row[0]} | Time: {row[1]}\n'
 
                     self.result = Response(text, buttons, session_state=1)
 
+        # Раздел активностей
         elif self.session_state == 2:
             self.get_checkins()
             text = ''
             buttons = MAIN_MENU_BUTTONS
-            if self.checkins and len(self.checkins) % 2 == 1:
-                last_checkin_time = self.checkins[-1][0]
+            if self.checkins_list and len(self.checkins_list) % 2 == 1:
+                last_checkin_time = self.checkins_list[-1][0]
                 last_checkin_time = self.get_time(last_checkin_time)
                 activity_duration = self.get_time(return_timestamp=True) - last_checkin_time
-                print(activity_duration)
+                activity_duration = activity_duration.total_seconds()
+                activity_id = 0
+                if self.activities_list:
+                    activity_id = self.activities_list[-1][1] + 1
+
                 if self.command == 'activity_work':
-                    self.add_checkin('stop', 'work')
+                    self.add_activity(activity_id, activity_duration, 'work', 'Работа')
                     text = 'Активность "Работа" была завершена!'
                 elif self.command == 'activity_homework':
-                    self.add_checkin('stop', 'homework')
+                    self.add_activity(activity_id, activity_duration, 'homework', 'Домашние дела')
                     text = 'Активность "Домашние Дела" была завершена!'
                 elif self.command == 'activity_hobby':
-                    self.add_checkin('stop', 'hobby')
+                    self.add_activity(activity_id, activity_duration, 'hobby', 'Хобби')
                     text = 'Активность "Хобби" была завершена!'
                 elif self.command == 'activity_sport':
-                    self.add_checkin('stop', 'sport')
+                    self.add_activity(activity_id, activity_duration, 'sport', 'Спорт')
                     text = 'Активность "Спорт" была завершена!'
 
                 self.result = Response(text, buttons, session_state=1)
@@ -107,7 +112,12 @@ class DialogHandler:
                 text = 'Принято! Отслеживаю активность "Спорт"'
 
             self.result = Response(text, buttons, session_state=1)
+
+        # Раздел статистики
+        elif self.session_state == 3:
+            pass
                 
+        # Раздел помощи
         elif self.session_state == 4:
             if self.command == 'about_skill':
                 self.about_skill()
@@ -150,12 +160,14 @@ class DialogHandler:
 
         self.result = Response(text, buttons, session_state=1)
 
+    # Меню
     def main_menu(self):
         """ Главаное меню навыка """
-        text = "Что бы Вы хотели сделать?"
+        text = TEXTS['main_menu']
         buttons = MAIN_MENU_BUTTONS
         self.result = Response(text, buttons, session_state=1)
 
+    # Активности
     def activities(self):
         text = TEXTS['activities']
         self.result = Response(text, session_state=2)
@@ -167,8 +179,18 @@ class DialogHandler:
 
     def get_checkins(self):
         db = DatabaseManager('checkins.db')
-        self.checkins = db.select_checkins(self.__user_id)
+        self.checkins_list = db.select_checkins(self.__user_id)
 
+    def add_activity(self, id, time, activity_type, text):
+        db = DatabaseManager('activities.db')
+        db.insert_activity(self.__user_id, id, time, activity_type, text)
+        db.insert_checkin(self.__user_id, self.get_time(), 'end', activity_type)
+
+    def get_activities(self):
+        db = DatabaseManager('activities.db')
+        self.activities_list = db.select_activities(self.__user_id)
+
+    # Помощь
     def help(self):
         """ Помощь пользователю """
         text = TEXTS['help']
@@ -191,6 +213,7 @@ class DialogHandler:
         self.result = Response(text, buttons, session_state=4)
 
     def get_time(self, time=None, return_timestamp=False):
+        """ Возвращает текущее время, либо преобразует str в timestamp """
         tz = pytz.timezone(self.timezone)
         if time:
             return dt.strptime(time, '%d-%m-%Y %H:%M:%S')
@@ -198,5 +221,5 @@ class DialogHandler:
         if return_timestamp:
             current_time = dt.strftime(dt.now(tz), '%d-%m-%Y %H:%M:%S')
             return dt.strptime(current_time, '%d-%m-%Y %H:%M:%S')
-            
+        
         return dt.strftime(dt.now(tz), '%d-%m-%Y %H:%M:%S')
