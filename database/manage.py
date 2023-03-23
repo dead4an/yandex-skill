@@ -2,7 +2,7 @@ import sqlite3 as sq
 
 CREATE_TABLE_CHECKINS = "CREATE TABLE IF NOT EXISTS checkins (user_id, time, type, checkin_type)"
 INSERT_CHECKIN = "INSERT INTO checkins VALUES (?,?,?,?)"
-SELECT_CHECKINS = "SELECT time, checkin_type FROM checkins WHERE user_id=?"
+SELECT_CHECKINS = "SELECT time, type FROM checkins WHERE user_id=?"
 SELECT_ALL_CHECKINS = "SELECT * FROM checkins"
 
 CREATE_TABLE_ACTIVITIES = "CREATE TABLE IF NOT EXISTS activities (user_id, activity_id, time, activity_type, text)"
@@ -10,8 +10,8 @@ INSERT_ACTIVITY = "INSERT INTO activities VALUES (?,?,?,?,?)"
 SELECT_ACTIVITIES = "SELECT activity_type, time, text FROM activities WHERE user_id=?"
 DELETE_ACTIVITY = "DELETE FROM activities WHERE user_id=? AND activity_id=?"
 
-CREATE_TABLE_USERS = "CREATE TABLE IF NOT EXISTS users (user_id, name, activities, timezone)"
-INSERT_USER = "INSERT INTO users VALUES (?,?,?,?)"
+CREATE_TABLE_USERS = "CREATE TABLE IF NOT EXISTS users (user_id, name)"
+INSERT_USER = "INSERT INTO users VALUES (?,?)"
 USER_EXISTS = "SELECT 1 FROM users WHERE user_id=? LIMIT 1"
 
 
@@ -43,7 +43,10 @@ class DatabaseManager:
             self.setup_connection()
             self.cur.execute(CREATE_TABLE_CHECKINS)
             self.cur.execute(SELECT_CHECKINS, (user_id,))
-            return self.cur.fetchall()
+
+            result = self.cur.fetchall()
+            print(result[:])
+            return result
         except Exception as _ex:
             print(f'Cannot select checkins\n{_ex}')
         finally:
@@ -82,10 +85,9 @@ class DatabaseManager:
             self.cur.execute(CREATE_TABLE_USERS)
 
             name = options['name']
-            activities = options['checkin-activities']
-            timezone = options['timezone']
+        
 
-            self.cur.execute(INSERT_USER, (user_id, name, activities, timezone))
+            self.cur.execute(INSERT_USER, (user_id, name))
             self.con.commit()
         except Exception as _ex:
             print(f'Cannot insert user\n{_ex}')

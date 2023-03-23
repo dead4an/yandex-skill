@@ -1,6 +1,7 @@
 from skill_requests.Response import Response
 from database.manage import DatabaseManager
-from .skill_buttons import SKILL_BUTTONS, MAIN_MENU_BUTTONS, HELP_BUTTONS, CARDS
+from .skill_buttons import SKILL_BUTTONS, MAIN_MENU_BUTTONS, HELP_BUTTONS, \
+                           ACTIVITY_TYPES, END_ACTIVITY, CARDS
 from .skill_texts import TEXTS
 from datetime import datetime as dt
 import pytz
@@ -28,6 +29,7 @@ class DialogHandler:
         self.timezone = timezone
         self.checkins_list = None
         self.activities_list = None
+        self.activity_state = 0
         self.result = None
 
         self.check_user_is_new()
@@ -73,7 +75,7 @@ class DialogHandler:
             self.get_checkins()
             text = ''
             buttons = MAIN_MENU_BUTTONS
-            if self.checkins_list and len(self.checkins_list) % 2 == 1:
+            if self.activity_state:
                 last_checkin_time = self.checkins_list[-1][0]
                 last_checkin_time = self.get_time(last_checkin_time)
                 activity_duration = self.get_time(return_timestamp=True) - last_checkin_time
@@ -85,14 +87,18 @@ class DialogHandler:
                 if self.command == 'activity_work':
                     self.add_activity(activity_id, activity_duration, 'work', 'Работа')
                     text = 'Активность "Работа" была завершена!'
+                    self.add_checkin('stop', self.command)
                 elif self.command == 'activity_homework':
                     self.add_activity(activity_id, activity_duration, 'homework', 'Домашние дела')
+                    self.add_checkin('stop', self.command)
                     text = 'Активность "Домашние Дела" была завершена!'
                 elif self.command == 'activity_hobby':
                     self.add_activity(activity_id, activity_duration, 'hobby', 'Хобби')
+                    self.add_checkin('stop', self.command)
                     text = 'Активность "Хобби" была завершена!'
                 elif self.command == 'activity_sport':
                     self.add_activity(activity_id, activity_duration, 'sport', 'Спорт')
+                    self.add_checkin('stop', self.command)
                     text = 'Активность "Спорт" была завершена!'
 
                 self.result = Response(text, buttons, session_state=1)
@@ -168,9 +174,24 @@ class DialogHandler:
         self.result = Response(text, buttons, session_state=1)
 
     # Активности
-    def activities(self):
+    def activities(self, activity_type):
         text = TEXTS['activities']
-        self.result = Response(text, session_state=2)
+        buttons = ACTIVITY_TYPES
+        activity_type.get_checkins()
+        if activity_type.checkins_list and len(activity_type.checkins_list) % 2 == 1:
+            activity_type = activity_type.checkins_list[-1][1]
+            if activity_type == 'activity_work':
+                text = 'Хотите завершить активность "Работа"?'
+            elif activity_type == 'activity_homework':
+                text = 'Хотите завершить активность "Домашние Дела"?'
+            elif activity_type == 'activity_hobby':
+                text = 'Хотите завершить активность "Хобби"?'
+            elif activity_type == 'activity_sport':
+                text = 'Хотите завершить активность "Спорт"?'
+                buttons = END_ACTIVITY
+            self.activity_state = 1
+
+        activity_type.result = Response(text, buttons, session_state=2)
 
     def add_checkin(self, type, checkin_type):
         db = DatabaseManager('checkins.db')
@@ -184,7 +205,6 @@ class DialogHandler:
     def add_activity(self, id, time, activity_type, text):
         db = DatabaseManager('activities.db')
         db.insert_activity(self.__user_id, id, time, activity_type, text)
-        db.insert_checkin(self.__user_id, self.get_time(), 'end', activity_type)
 
     def get_activities(self):
         db = DatabaseManager('activities.db')

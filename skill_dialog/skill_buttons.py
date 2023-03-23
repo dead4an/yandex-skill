@@ -4,7 +4,7 @@ DOMEN = 'https://40a2-83-220-236-37.eu.ngrok.io'
 SKILL_BUTTONS = {
     # About
     'help': {
-        'title': 'Помощь \U0001F4D6',
+        'title': '\U0001F4D6 Помощь',
         'payload': ['help'],
         'hide': False
     },
@@ -24,9 +24,9 @@ SKILL_BUTTONS = {
         'hide': False
     },
 
-    # Checkin
+    # Activities
     'activities': {
-        'title': 'Отметки \U00002705',
+        'title': '\U00002705 Активности',
         'payload': ['activities'],
         'hide': False
     },
@@ -36,22 +36,58 @@ SKILL_BUTTONS = {
         'hide': False
     },
 
+    'activity_work': {
+        'title': 'Работа',
+        'payload': ['activity_work'],
+        'hide': True
+    },
+
+    'activity_homework': {
+        'title': 'Домашние Дела',
+        'payload': ['activity_homework'],
+        'hide': True
+    },
+
+    'activity_hobby': {
+        'title': 'Хобби',
+        'payload': ['activity_hobby'],
+        'hide': True
+    },
+
+    'activity_sport': {
+        'title': 'Спорт',
+        'payload': ['activity_sport'],
+        'hide': True
+    },
+
+    'activity_end_yes': {
+        'title': 'Завершить активность',
+        'payload': ['activity_end'],
+        'hide': True
+    },
+    
+    'activity_end_no': {
+        'title': 'Отмена',
+        'payload': ['activity_continue'],
+        'hide': True
+    },
+
     # Statistic
     'statistic': {
-        'title': 'Моя статистика \U0001F4CA',
+        'title': '\U0001F4CA Статистика',
         'payload': ['statistic'],
         'hide': False
     },
 
     # Hello
     'hello_new': {
-        'title': 'Поехали \U0001F525',
+        'title': '\U0001F525 Поехали',
         'payload': ['yes'],
         'hide': False
     },
 
     'back': {
-        'title': 'Назад',
+        'title': '\U0001F519 Назад',
         'payload': ['back'],
         'hide': False
     }
@@ -81,4 +117,17 @@ HELP_BUTTONS = [
     SKILL_BUTTONS['about_activities'],
     SKILL_BUTTONS['about_statistic'],
     SKILL_BUTTONS['back']
+]
+
+ACTIVITY_TYPES = [
+    SKILL_BUTTONS['activity_work'],
+    SKILL_BUTTONS['activity_homework'],
+    SKILL_BUTTONS['activity_hobby'],
+    SKILL_BUTTONS['activity_hobby'],
+    SKILL_BUTTONS['back']
+]
+
+END_ACTIVITY = [
+    SKILL_BUTTONS['activity_end_yes'],
+    SKILL_BUTTONS['activity_end_no']
 ]
