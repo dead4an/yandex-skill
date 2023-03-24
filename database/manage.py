@@ -83,10 +83,7 @@ class DatabaseManager:
         try:
             self.setup_connection()
             self.cur.execute(CREATE_TABLE_USERS)
-
             name = options['name']
-        
-
             self.cur.execute(INSERT_USER, (user_id, name))
             self.con.commit()
         except Exception as _ex:

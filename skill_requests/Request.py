@@ -33,6 +33,9 @@ class Request:
 
         elif self.session_state == 2:
             self.command = classify_command(nlu_tokens, METRICS['activity_types'])
+        
+        elif self.session_state == 21:
+            self.command = classify_command(nlu_tokens, METRICS['end_activity'])
 
         elif self.session_state == 4:
             self.command = classify_command(nlu_tokens, METRICS['help'])

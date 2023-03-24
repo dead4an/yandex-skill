@@ -40,12 +40,9 @@ command_classifier_dict = {
         'спорте', 'физические', 'упражнения'
     },
 
-    'add_activity': {
-        'добавить', 'начать', 'создать', 'отметить'
-    },
-
     'close_activity': {
-        'закончить', 'стоп', 'остановить'
+        'закончить', 'стоп', 'остановить', 'завершить',
+        'конец', 'закончила', 'закончил', 'закончи'
     },
 
     # Подразделы помощи
@@ -92,6 +89,7 @@ METRICS = {
     'main_menu': ['yes', 'no', 'help', 'activities', 'statistic'],
     'activity_types': ['activity_work', 'activity_homework',
                  'activity_hobby', 'activity_sport'],
+    'end_activity': ['close_activity', 'no'],
     'help': ['about_skill', 'about_activities', 
              'about_statistic', 'back', 'back_to_menu']
 }

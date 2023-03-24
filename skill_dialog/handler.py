@@ -75,7 +75,7 @@ class DialogHandler:
             self.get_checkins()
             text = ''
             buttons = MAIN_MENU_BUTTONS
-            if self.activity_state:
+            if self.checkins_list and len(self.checkins_list) % 2 == 1:
                 last_checkin_time = self.checkins_list[-1][0]
                 last_checkin_time = self.get_time(last_checkin_time)
                 activity_duration = self.get_time(return_timestamp=True) - last_checkin_time
@@ -174,24 +174,10 @@ class DialogHandler:
         self.result = Response(text, buttons, session_state=1)
 
     # Активности
-    def activities(self, activity_type):
+    def activities(self):
         text = TEXTS['activities']
         buttons = ACTIVITY_TYPES
-        activity_type.get_checkins()
-        if activity_type.checkins_list and len(activity_type.checkins_list) % 2 == 1:
-            activity_type = activity_type.checkins_list[-1][1]
-            if activity_type == 'activity_work':
-                text = 'Хотите завершить активность "Работа"?'
-            elif activity_type == 'activity_homework':
-                text = 'Хотите завершить активность "Домашние Дела"?'
-            elif activity_type == 'activity_hobby':
-                text = 'Хотите завершить активность "Хобби"?'
-            elif activity_type == 'activity_sport':
-                text = 'Хотите завершить активность "Спорт"?'
-                buttons = END_ACTIVITY
-            self.activity_state = 1
-
-        activity_type.result = Response(text, buttons, session_state=2)
+        self.result = Response(text, buttons, session_state=2)
 
     def add_checkin(self, type, checkin_type):
         db = DatabaseManager('checkins.db')
