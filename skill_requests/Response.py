@@ -1,7 +1,8 @@
 class Response:
     def __init__(self, text: str, buttons=None, card=None,
-                 session_state=0, end_session=False) -> None:
+                 session_state=0, end_session=False, tts=None) -> None:
         self.text = text
+        self.tts = tts
         self.buttons = buttons
         self.card = card
         self.session_state = session_state
@@ -26,5 +27,8 @@ class Response:
         
         if self.buttons and len(self.buttons) > 0:
             response['response'].update({'buttons': self.buttons})
+
+        if self.tts:
+            response['response'].update({'tts': self.tts})
 
         return response

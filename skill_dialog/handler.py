@@ -29,10 +29,11 @@ class DialogHandler:
         self.timezone = timezone
         self.checkins_list = None
         self.activities_list = None
-        self.activity_state = 0
+        self.activity_name = None
         self.result = None
 
         self.check_user_is_new()
+        self.get_checkins()
 
     def process(self):
         """ Обработка команды """
@@ -40,7 +41,7 @@ class DialogHandler:
             self.new_session()
             return
 
-        if self.command == 'none':
+        if self.command in ('none', 'None'):
             self.command_not_found()
             return
         
@@ -59,65 +60,50 @@ class DialogHandler:
                 self.help()
 
             elif self.command == 'activities':
+                if self.checkins_list and len(self.checkins_list) % 2 == 1:
+                    self.close_activity(confirm_state=True)
+                    return
+                
                 self.activities()
 
             elif self.command == 'statistic':
                     self.get_activities()
                     text = ''
                     buttons = MAIN_MENU_BUTTONS
+
+                    if len(self.activities_list) == 0:
+                        text = 'Похоже, у Вас ещё нет завершённых активностей!'
+                        self.result = Response(text, buttons, session_state=1)
+                        return
+
                     for row in self.activities_list[:10]:
-                        text += f'Type: {row[0]} | Time: {row[1]}\n'
+                        text += f'Type: {row[1]} | Start: {row[3]} | Duration: {row[4]}\n'
 
                     self.result = Response(text, buttons, session_state=1)
 
         # Раздел активностей
         elif self.session_state == 2:
-            self.get_checkins()
             text = ''
             buttons = MAIN_MENU_BUTTONS
+            self.set_activity_name(self.command)          
+            if self.command == 'back':
+                self.main_menu()
+                return
+            
             if self.checkins_list and len(self.checkins_list) % 2 == 1:
-                last_checkin_time = self.checkins_list[-1][0]
-                last_checkin_time = self.get_time(last_checkin_time)
-                activity_duration = self.get_time(return_timestamp=True) - last_checkin_time
-                activity_duration = activity_duration.total_seconds()
-                activity_id = 0
-                if self.activities_list:
-                    activity_id = self.activities_list[-1][1] + 1
-
-                if self.command == 'activity_work':
-                    self.add_activity(activity_id, activity_duration, 'work', 'Работа')
-                    text = 'Активность "Работа" была завершена!'
-                    self.add_checkin('stop', self.command)
-                elif self.command == 'activity_homework':
-                    self.add_activity(activity_id, activity_duration, 'homework', 'Домашние дела')
-                    self.add_checkin('stop', self.command)
-                    text = 'Активность "Домашние Дела" была завершена!'
-                elif self.command == 'activity_hobby':
-                    self.add_activity(activity_id, activity_duration, 'hobby', 'Хобби')
-                    self.add_checkin('stop', self.command)
-                    text = 'Активность "Хобби" была завершена!'
-                elif self.command == 'activity_sport':
-                    self.add_activity(activity_id, activity_duration, 'sport', 'Спорт')
-                    self.add_checkin('stop', self.command)
-                    text = 'Активность "Спорт" была завершена!'
-
-                self.result = Response(text, buttons, session_state=1)
+                self.close_activity(confirm_state=True)
                 return
 
-            if self.command == 'activity_work':
-                self.add_checkin('start', 'work')
-                text = 'Принято! Отслеживаю активность "Работа"'
-            elif self.command == 'activity_homework':
-                self.add_checkin('start', 'homework')
-                text = 'Принято! Отслеживаю активность "Домашние дела"'
-            elif self.command == 'activity_hobby':
-                self.add_checkin('start', 'hobby')
-                text = 'Принято! Отслеживаю активность "хобби"'
-            elif self.command == 'activity_sport':
-                self.add_checkin('start', 'sport')
-                text = 'Принято! Отслеживаю активность "Спорт"'
-
+            self.add_checkin('start', self.command)
+            text = f'Принято! Отслеживаю активность "{self.activity_name}"'
             self.result = Response(text, buttons, session_state=1)
+
+        elif self.session_state == 21:
+            if self.command == 'close_activity':
+                self.close_activity()
+            
+            elif self.command == 'continue_activity':
+                self.main_menu()
 
         # Раздел статистики
         elif self.session_state == 3:
@@ -188,13 +174,44 @@ class DialogHandler:
         db = DatabaseManager('checkins.db')
         self.checkins_list = db.select_checkins(self.__user_id)
 
-    def add_activity(self, id, time, activity_type, text):
+    def add_activity(self, id, start_time, end_time, duration, 
+                     activity_type, text):
         db = DatabaseManager('activities.db')
-        db.insert_activity(self.__user_id, id, time, activity_type, text)
+        db.insert_activity(self.__user_id, id, start_time, end_time,
+                            duration, activity_type, text)
 
     def get_activities(self):
         db = DatabaseManager('activities.db')
         self.activities_list = db.select_activities(self.__user_id)
+
+    def close_activity(self, confirm_state=False):
+        self.set_activity_name(self.checkins_list[-1][2])
+        text = ''
+        buttons = MAIN_MENU_BUTTONS
+
+        start_time = self.checkins_list[-1][0]
+        start_time = self.get_time(start_time)
+        current_time = self.get_time(return_timestamp=True)
+        activity_duration = current_time - start_time
+        activity_id = 0
+
+        if confirm_state:
+            text = f'Активность: {self.activity_name} \nНачало: {start_time}\n' \
+            f'Продолжительность: {activity_duration}\nХотите завершить активность?"'
+            buttons = END_ACTIVITY
+            self.result = Response(text, buttons, session_state=21)
+            return
+                
+        if self.activities_list:
+            activity_id = self.activities_list[-1][1] + 1
+
+        self.add_activity(activity_id, start_time, current_time, activity_duration.total_seconds(),
+                           self.checkins_list[-1][2], 'text')
+        self.add_checkin('stop', self.checkins_list[-1][2])
+        text = f'Активность "{self.activity_name}" была завершена!'
+
+        self.result = Response(text, buttons, session_state=1)
+        return
 
     # Помощь
     def help(self):
@@ -229,3 +246,13 @@ class DialogHandler:
             return dt.strptime(current_time, '%d-%m-%Y %H:%M:%S')
         
         return dt.strftime(dt.now(tz), '%d-%m-%Y %H:%M:%S')
+
+    def set_activity_name(self, activity_type):
+        if activity_type == 'activity_work':
+            self.activity_name = 'Работа'
+        elif activity_type == 'activity_homework':
+            self.activity_name = 'Домашние Дела'
+        elif activity_type == 'activity_hobby':
+            self.activity_name = 'Хобби'
+        elif activity_type == 'activity_sport':
+            self.activity_name = 'Спорт'

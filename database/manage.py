@@ -2,12 +2,12 @@ import sqlite3 as sq
 
 CREATE_TABLE_CHECKINS = "CREATE TABLE IF NOT EXISTS checkins (user_id, time, type, checkin_type)"
 INSERT_CHECKIN = "INSERT INTO checkins VALUES (?,?,?,?)"
-SELECT_CHECKINS = "SELECT time, type FROM checkins WHERE user_id=?"
+SELECT_CHECKINS = "SELECT time, type, checkin_type FROM checkins WHERE user_id=?"
 SELECT_ALL_CHECKINS = "SELECT * FROM checkins"
 
-CREATE_TABLE_ACTIVITIES = "CREATE TABLE IF NOT EXISTS activities (user_id, activity_id, time, activity_type, text)"
-INSERT_ACTIVITY = "INSERT INTO activities VALUES (?,?,?,?,?)"
-SELECT_ACTIVITIES = "SELECT activity_type, time, text FROM activities WHERE user_id=?"
+CREATE_TABLE_ACTIVITIES = "CREATE TABLE IF NOT EXISTS activities (user_id, activity_id, start_time, end_time, duration, activity_type, text)"
+INSERT_ACTIVITY = "INSERT INTO activities VALUES (?,?,?,?,?,?,?)"
+SELECT_ACTIVITIES = "SELECT activity_id, activity_type, start_time, end_time, duration, text FROM activities WHERE user_id=?"
 DELETE_ACTIVITY = "DELETE FROM activities WHERE user_id=? AND activity_id=?"
 
 CREATE_TABLE_USERS = "CREATE TABLE IF NOT EXISTS users (user_id, name)"
@@ -43,23 +43,21 @@ class DatabaseManager:
             self.setup_connection()
             self.cur.execute(CREATE_TABLE_CHECKINS)
             self.cur.execute(SELECT_CHECKINS, (user_id,))
-
-            result = self.cur.fetchall()
-            print(result[:])
-            return result
+            return self.cur.fetchall()
         except Exception as _ex:
             print(f'Cannot select checkins\n{_ex}')
         finally:
             self.close_connection()
 
     # Работа с активностями
-    def insert_activity(self, user_id, activity_id, time, activity_type, text):
+    def insert_activity(self, user_id, activity_id, start_time, end_time, 
+                        duration, activity_type, text):
         """ Добавляет запись об активности в базу данных """
         try:
             self.setup_connection()
             self.cur.execute(CREATE_TABLE_ACTIVITIES)
-            self.cur.execute(INSERT_ACTIVITY, (user_id, activity_id, time,
-                                               activity_type, text))
+            self.cur.execute(INSERT_ACTIVITY, (user_id, activity_id, start_time, end_time,
+                                               duration, activity_type, text))
             self.con.commit()
         except Exception as _ex:
             print(f'Cannot insert activity\n{_ex}')

@@ -1,4 +1,4 @@
-DOMEN = 'https://40a2-83-220-236-37.eu.ngrok.io'
+DOMEN = 'https://4dfa-83-220-236-37.eu.ngrok.io'
 
 # Кнопки навыка
 SKILL_BUTTONS = {
@@ -37,24 +37,48 @@ SKILL_BUTTONS = {
     },
 
     'activity_work': {
-        'title': 'Работа',
+        'title': '\U0001F4BC Работа',
         'payload': ['activity_work'],
-        'hide': True
+        'hide': False
     },
 
     'activity_homework': {
-        'title': 'Домашние Дела',
+        'title': '\U0001F3E0 Домашние Дела',
         'payload': ['activity_homework'],
-        'hide': True
+        'hide': False
     },
 
     'activity_hobby': {
         'title': 'Хобби',
         'payload': ['activity_hobby'],
-        'hide': True
+        'hide': False
     },
 
     'activity_sport': {
+        'title': 'Спорт',
+        'payload': ['activity_sport'],
+        'hide': False
+    },
+
+    'activity_work_hide': {
+        'title': 'Работа',
+        'payload': ['activity_work'],
+        'hide': True
+    },
+
+    'activity_homework_hide': {
+        'title': 'Домашние Дела',
+        'payload': ['activity_homework'],
+        'hide': True
+    },
+
+    'activity_hobby_hide': {
+        'title': 'Хобби',
+        'payload': ['activity_hobby'],
+        'hide': True
+    },
+
+    'activity_sport_hide': {
         'title': 'Спорт',
         'payload': ['activity_sport'],
         'hide': True
@@ -62,13 +86,25 @@ SKILL_BUTTONS = {
 
     'activity_end_yes': {
         'title': 'Завершить активность',
-        'payload': ['activity_end'],
-        'hide': True
+        'payload': ['close_activity'],
+        'hide': False
     },
     
     'activity_end_no': {
         'title': 'Отмена',
-        'payload': ['activity_continue'],
+        'payload': ['continue_activity'],
+        'hide': False
+    },
+
+    'activity_end_yes_hide': {
+        'title': 'Завершить активность',
+        'payload': ['close_activity'],
+        'hide': True
+    },
+    
+    'activity_end_no_hide': {
+        'title': 'Отмена',
+        'payload': ['continue_activity'],
         'hide': True
     },
 
@@ -123,11 +159,17 @@ ACTIVITY_TYPES = [
     SKILL_BUTTONS['activity_work'],
     SKILL_BUTTONS['activity_homework'],
     SKILL_BUTTONS['activity_hobby'],
-    SKILL_BUTTONS['activity_hobby'],
+    SKILL_BUTTONS['activity_sport'],
+    SKILL_BUTTONS['activity_work_hide'],
+    SKILL_BUTTONS['activity_homework_hide'],
+    SKILL_BUTTONS['activity_hobby_hide'],
+    SKILL_BUTTONS['activity_sport_hide'],
     SKILL_BUTTONS['back']
 ]
 
 END_ACTIVITY = [
     SKILL_BUTTONS['activity_end_yes'],
-    SKILL_BUTTONS['activity_end_no']
+    SKILL_BUTTONS['activity_end_no'],
+    SKILL_BUTTONS['activity_end_yes_hide'],
+    SKILL_BUTTONS['activity_end_no_hide']
 ]
