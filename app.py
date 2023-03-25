@@ -27,10 +27,5 @@ def main():
     print('Time: ', time.time() - start)
     return dialog.respond()
 
-
-@app.route('/statistic', methods=['POST', 'GET'])
-def stat():
-    return render_template('statistic.html')
-
-
-app.run('0.0.0.0', port=5000, debug=True)
+if __name__ == '__main__':
+    app.run(host='0.0.0.0')
