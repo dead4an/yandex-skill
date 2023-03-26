@@ -1,116 +1,143 @@
-import sqlite3 as sq
+import os
+import ydb
+import ydb.iam
 
-CREATE_TABLE_CHECKINS = "CREATE TABLE IF NOT EXISTS checkins (user_id, time, type, checkin_type)"
-INSERT_CHECKIN = "INSERT INTO checkins VALUES (?,?,?,?)"
-SELECT_CHECKINS = "SELECT time, type, checkin_type FROM checkins WHERE user_id=?"
-SELECT_ALL_CHECKINS = "SELECT * FROM checkins"
 
-CREATE_TABLE_ACTIVITIES = "CREATE TABLE IF NOT EXISTS activities (user_id, activity_id, start_time, end_time, duration, activity_type, text)"
-INSERT_ACTIVITY = "INSERT INTO activities VALUES (?,?,?,?,?,?,?)"
-SELECT_ACTIVITIES = "SELECT activity_id, activity_type, start_time, end_time, duration, text FROM activities WHERE user_id=?"
-DELETE_ACTIVITY = "DELETE FROM activities WHERE user_id=? AND activity_id=?"
+INSERT_CHECKIN = """
+DECLARE $id AS Uint64;
+DECLARE $user_id AS Utf8;
+DECLARE $start_time AS Utf8; 
+DECLARE $type AS Utf8; 
+DECLARE $checkin_type AS Utf8; 
+UPSERT INTO checkins (id, user_id, start_time, type, checkin_type) 
+VALUES ($id, $user_id, $start_time, $type, $checkin_type);"""
 
-CREATE_TABLE_USERS = "CREATE TABLE IF NOT EXISTS users (user_id, name)"
-INSERT_USER = "INSERT INTO users VALUES (?,?)"
-USER_EXISTS = "SELECT 1 FROM users WHERE user_id=? LIMIT 1"
+SELECT_CHECKINS = """
+DECLARE $user_id AS Utf8;
+SELECT (id, start_time, type, checkin_type) FROM checkins WHERE user_id=$user_id;"""
+
+INSERT_ACTIVITY = """
+DECLARE $id AS Uint64; 
+DECLARE $user_id AS Utf8;
+DECLARE $activity_id AS Uint64; 
+DECLARE $start_time AS Utf8; 
+DECLARE $end_time AS Utf8; 
+DECLARE $duration AS Uint64; 
+DECLARE $activity_type AS Utf8; 
+DECLARE $text AS Utf8; 
+UPSERT INTO activities (id, user_id, activity_id, start_time, end_time, duration, activity_type, text) 
+VALUES ($id, $user_id, $activity_id, $start_time, $end_time, $duration, $activity_type, $text);"""
+
+SELECT_ACTIVITIES = """
+DECLARE $user_id AS Utf8;
+SELECT (id, user_id, activity_id, start_time, end_time, duration, activity_type, text)  
+FROM activities WHERE user_id=$user_id;"""
+
+INSERT_USER = """
+DECLARE $id AS Utf8;
+DECLARE $user_id AS Utf8;
+DECLARE $name AS Utf8;
+UPSERT INTO users (id, name) VALUES ($id, $name);"""
+
+USER_EXISTS = """
+DECLARE $id AS Utf8;
+SELECT 1 FROM users WHERE id=$id LIMIT 1;"""
 
 
 class DatabaseManager:
-    def __init__(self, path_to_db):
-        self.con: sq.Connection
-        self.cur: sq.Cursor
 
-        self.path_to_db = path_to_db
-        self.con = None
-        self.cur = None
+    def execute(self, query, params):
+        with ydb.Driver(
+            endpoint=os.getenv('ENDPOINT'),
+            database=os.getenv('DATABASE'),
+            credentials=ydb.iam.MetadataUrlCredentials(),
+        ) as driver:
+            try:
+                driver.wait(fail_fast=True, timeout=5)
+            except TimeoutError:
+                print('Connect failed to YDB | TIMEOUT')
+                print(driver.discovery_debug_details())
+                return None
+
+            try:
+                session = driver.table_client.session().create()
+                prepared_query = session.prepare(query)
+
+                return session.transaction(ydb.SerializableReadWrite()).execute(
+                    prepared_query,
+                    params,
+                    commit_tx=True
+                )
+            except Exception as _ex:
+                print(f'\n\n===\n{_ex}\n===\n\n')
 
     # Работа с отметками
-    def insert_checkin(self, user_id, time, type, checkin_type):
+    def insert_checkin(self, id, user_id, start_time, type, checkin_type):
         """ Загружает отметку в базу данных """
-        try:
-            self.setup_connection()
-            self.cur.execute(CREATE_TABLE_CHECKINS)
-            self.cur.execute(INSERT_CHECKIN, (user_id, time, type, checkin_type))
-            self.con.commit()
-        except Exception as _ex:
-            print(f'Cannot insert checkin\n{_ex}')
-        finally:
-            self.close_connection()
+        query = INSERT_CHECKIN
+        params = {
+            '$id': id, '$user_id': user_id, '$start_time': start_time,
+            '$type': type, '$checkin_type': checkin_type
+        }
+
+        self.execute(query, params)
 
     def select_checkins(self, user_id):
         """ Возвращает отметки пользователя """
-        try:
-            self.setup_connection()
-            self.cur.execute(CREATE_TABLE_CHECKINS)
-            self.cur.execute(SELECT_CHECKINS, (user_id,))
-            return self.cur.fetchall()
-        except Exception as _ex:
-            print(f'Cannot select checkins\n{_ex}')
-        finally:
-            self.close_connection()
+        query = SELECT_CHECKINS
+        params = {'$user_id': user_id}
+
+        result_set = self.execute(query, params)
+        if not result_set or not result_set[0].rows:
+            return None
+
+        # print(result_set[0].rows) [{col0: {val1, val2}}]
+        checkins_list = []
+        for row in result_set[0].rows:
+            checkins_list.append(list(row.values()))
+
+        return checkins_list
 
     # Работа с активностями
-    def insert_activity(self, user_id, activity_id, start_time, end_time, 
+    def insert_activity(self, id, user_id, activity_id, start_time, end_time,
                         duration, activity_type, text):
         """ Добавляет запись об активности в базу данных """
-        try:
-            self.setup_connection()
-            self.cur.execute(CREATE_TABLE_ACTIVITIES)
-            self.cur.execute(INSERT_ACTIVITY, (user_id, activity_id, start_time, end_time,
-                                               duration, activity_type, text))
-            self.con.commit()
-        except Exception as _ex:
-            print(f'Cannot insert activity\n{_ex}')
-        finally:
-            self.close_connection()
+        query = INSERT_ACTIVITY
+        params = {
+            '$user_id': user_id, '$activity_id': activity_id, '$start_time': start_time,
+            '$end_time': end_time, '$duration': duration, '$activity_type': activity_type,
+            '$text': text, '$id': id
+        }
+
+        self.execute(query, params)
 
     def select_activities(self, user_id):
         """ Возвращает активности пользователя """
-        try:
-            self.setup_connection()
-            self.cur.execute(CREATE_TABLE_ACTIVITIES)
-            self.cur.execute(SELECT_ACTIVITIES, (user_id,))
-            return self.cur.fetchall()
-        except Exception as _ex:
-            print(f'Cannot select activities\n{_ex}')
-        finally:
-            self.close_connection()
+        query = SELECT_ACTIVITIES
+        params = {'$user_id': user_id}
+
+        result_set = self.execute(query, params)
+        if not result_set or not result_set[0].rows:
+            return None
+
+        activities_list = []
+        for row in result_set[0].rows:
+            activities_list.append(list(row.values()))
+
+        print(activities_list)
+        return activities_list
 
     # Работа с пользователями
-    def insert_user(self, user_id, options):
-        try:
-            self.setup_connection()
-            self.cur.execute(CREATE_TABLE_USERS)
-            name = options['name']
-            self.cur.execute(INSERT_USER, (user_id, name))
-            self.con.commit()
-        except Exception as _ex:
-            print(f'Cannot insert user\n{_ex}')
-        finally:
-            self.close_connection()
+    def insert_user(self, user_id, name):
+        query = INSERT_USER
+        params = {'$id': user_id, '$name': name}
+        self.execute(query, params)
 
     def check_user_exists(self, user_id):
-        try:
-            self.setup_connection()
-            self.cur.execute(CREATE_TABLE_USERS)
-            return self.cur.execute(USER_EXISTS, (user_id,)).fetchone()
-        except Exception as _ex:
-            print(f'Cannot select user (check)\n{_ex}')
-        finally:
-            self.close_connection()
+        query = USER_EXISTS
+        params = {'$id': user_id}
+        result_set = self.execute(query, params)
+        if not result_set or not result_set[0].rows:
+            return None
 
-    # Работа с соединением
-    def setup_connection(self):
-        try:
-            self.con = sq.connect(self.path_to_db)
-            self.cur = self.con.cursor()
-        except Exception as _ex:
-            self.close_connection()
-            print(f'Cannot setup connection to database\n{_ex}')
-
-    def close_connection(self):
-        try:
-            self.cur.close()
-            self.con.close()
-        except Exception as _ex:
-            print(f'Cannot close connection\n{_ex}')
+        return result_set[0]
