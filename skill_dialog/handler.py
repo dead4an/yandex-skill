@@ -4,6 +4,7 @@ from .skill_buttons import SKILL_BUTTONS, MAIN_MENU_BUTTONS, HELP_BUTTONS, \
                            ACTIVITY_TYPES, END_ACTIVITY, CARDS
 from .skill_texts import TEXTS
 from datetime import datetime as dt
+import time
 import pytz
 import random
 
@@ -189,14 +190,16 @@ class DialogHandler:
         text = ''
         buttons = MAIN_MENU_BUTTONS
 
-        start_time = self.checkins_list[-1][0]
+        start_time = self.checkins_list[-2][0]
         start_time = self.get_time(start_time)
         current_time = self.get_time(return_timestamp=True)
         activity_duration = current_time - start_time
+        activity_duration = dt.strptime(str(activity_duration), "%H:%M:%S")
+        activity_duration = dt.strftime(activity_duration, "%H:%M:%S")
         activity_id = 0
 
         if confirm_state:
-            text = f'Активность: {self.activity_name} \nНачало: {start_time}\n' \
+            text = f'Активность: {self.activity_name} \nНачало: {dt.strftime(start_time, "%H:%M:%S")}\n' \
             f'Продолжительность: {activity_duration}\nХотите завершить активность?"'
             buttons = END_ACTIVITY
             self.result = Response(text, buttons, session_state=21)
@@ -205,7 +208,9 @@ class DialogHandler:
         if self.activities_list:
             activity_id = self.activities_list[-1][1] + 1
 
-        self.add_activity(activity_id, start_time, current_time, activity_duration.total_seconds(),
+        activity_duration = dt.strptime(str(activity_duration), "%H:%M:%S")
+        activity_duration = time.mktime(activity_duration.timetuple())
+        self.add_activity(activity_id, start_time, current_time, activity_duration,
                            self.checkins_list[-1][2], 'text')
         self.add_checkin('stop', self.checkins_list[-1][2])
         text = f'Активность "{self.activity_name}" была завершена!'
