@@ -49,7 +49,35 @@ command_classifier_dict = {
 
     'continue_activity': {
         'нет', 'отмена', 'продолжи', 'продолжать',
-        'назад', 'продолжай', 'отменить', 'continue_activity'
+        'назад', 'продолжай', 'отменить', 'continue_activity',
+        'дальше'
+    },
+
+    # Статистика
+    'get_entries': {
+        'записи', 'активности', 'текст', 'активность',
+        'отметки', 'get_entries', 'список', 'активностей'
+    },
+
+    'get_visualisation': {
+        'визуализация', 'диаграмма', 'круговая',
+        'красивая', 'круг', 'визуализацию', 'диаграмму',
+        'get_visualisation'
+    },
+
+    'entries_continue': {
+        'далее', 'продолжи', 'продолжать', 'следующая',
+        'дальше', 'следующие', 'следующую', 'вперёд', 'вперед'
+    },
+
+    'entries_previous': {
+        'назад', 'предыдущая', 'прошлая',
+        'до', 'entries_previous', 'вернуться',
+        'перед', 'предыдущую'
+    },
+
+    'entries_stop': {
+        'entries_stop'
     },
 
     # Подразделы помощи
@@ -78,7 +106,7 @@ command_classifier_dict = {
     },
     'no': {
         'нет', 'не-а', 'не', 'отмени', 'отмена', 'верни',
-        'стой', 'стоп', 'подожди', 'потом', 'никак', 'no'
+        'стой', 'стоп', 'подожди', 'потом', 'никак', 'no',
     },
 
     # Назад
@@ -93,10 +121,21 @@ command_classifier_dict = {
 }
 
 METRICS = {
+    # Главное меню
     'main_menu': ['yes', 'no', 'help', 'activities', 'statistic'],
+
+    # Активности
     'activity_types': ['activity_work', 'activity_homework',
-                 'activity_hobby', 'activity_sport', 'back'],
+                       'activity_hobby', 'activity_sport', 'back'],
     'close_activity': ['close_activity', 'continue_activity'],
+
+    # Статистика
+    'statistic': ['get_entries', 'get_visualisation',
+                  'back', 'back_to_menu'],
+    'entries_view': ['entries_continue', 'entries_previous',
+                     'entries_stop', 'no', 'back_to_menu'],
+
+    # Помощь
     'help': ['about_skill', 'about_activities', 
              'about_statistic', 'back', 'back_to_menu']
 }

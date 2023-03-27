@@ -30,8 +30,9 @@ VALUES ($id, $user_id, $activity_id, $start_time, $end_time, $duration, $activit
 
 SELECT_ACTIVITIES = """
 DECLARE $user_id AS Utf8;
+DECLARE $today_date AS Utf8;
 SELECT (id, user_id, activity_id, start_time, end_time, duration, activity_type, text)  
-FROM activities WHERE user_id=$user_id;"""
+FROM activities WHERE user_id=$user_id AND start_time > $today_date;"""
 
 INSERT_USER = """
 DECLARE $id AS Utf8;
@@ -111,10 +112,10 @@ class DatabaseManager:
 
         self.execute(query, params)
 
-    def select_activities(self, user_id):
+    def select_activities(self, user_id, today_date):
         """ Возвращает активности пользователя """
         query = SELECT_ACTIVITIES
-        params = {'$user_id': user_id}
+        params = {'$user_id': user_id, '$today_date': today_date}
 
         result_set = self.execute(query, params)
         if not result_set or not result_set[0].rows:
@@ -124,7 +125,6 @@ class DatabaseManager:
         for row in result_set[0].rows:
             activities_list.append(list(row.values()))
 
-        print(activities_list)
         return activities_list
 
     # Работа с пользователями

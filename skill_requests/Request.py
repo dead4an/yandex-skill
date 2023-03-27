@@ -37,6 +37,12 @@ class Request:
         elif self.session_state == 21:
             self.command = classify_command(nlu_tokens, METRICS['close_activity'])
 
+        elif self.session_state == 3:
+            self.command = classify_command(nlu_tokens, METRICS['statistic'])
+
+        elif self.session_state >= 31:
+            self.command = classify_command(nlu_tokens, METRICS['entries_view'])
+
         elif self.session_state == 4:
             self.command = classify_command(nlu_tokens, METRICS['help'])
 

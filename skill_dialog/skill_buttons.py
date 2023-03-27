@@ -9,17 +9,17 @@ SKILL_BUTTONS = {
         'hide': False
     },
     'about_skill': {
-        'title': 'О навыке',
+        'title': '\U0001F4D6 О навыке',
         'payload': ['about_skill'],
         'hide': False
     },
     'about_activities': {
-        'title': 'Об отметках',
+        'title': '\U0001F4D6 Об активностях',
         'payload': ['about_activities'],
         'hide': False
     },
     'about_statistic': {
-        'title': 'О статистике',
+        'title': '\U0001F4D6 О статистике',
         'payload': ['about_statistic'],
         'hide': False
     },
@@ -49,13 +49,13 @@ SKILL_BUTTONS = {
     },
 
     'activity_hobby': {
-        'title': 'Хобби',
+        'title': '\U0001f3ae Хобби',
         'payload': ['activity_hobby'],
         'hide': False
     },
 
     'activity_sport': {
-        'title': 'Спорт',
+        'title': '\U0001F3BE Спорт',
         'payload': ['activity_sport'],
         'hide': False
     },
@@ -85,13 +85,13 @@ SKILL_BUTTONS = {
     },
 
     'activity_end_yes': {
-        'title': 'Завершить активность',
+        'title': '\U00002705 Завершить активность',
         'payload': ['close_activity'],
         'hide': False
     },
     
     'activity_end_no': {
-        'title': 'Отмена',
+        'title': '\U0000274C Отмена',
         'payload': ['continue_activity'],
         'hide': False
     },
@@ -115,6 +115,36 @@ SKILL_BUTTONS = {
         'hide': False
     },
 
+    'get_visualisation': {
+        'title': 'Визуализация',
+        'payload': ['get_visualisation'],
+        'hide': False
+    },
+
+    'get_entries': {
+        'title': 'Список активностей',
+        'payload': ['get_entries', None],
+        'hide': False
+    },
+
+    'entries_continue': {
+        'title': 'Следующая страница',
+        'payload': ['entries_continue'],
+        'hide': False
+    },
+
+    'entries_previous': {
+        'title': 'Предыдущая страница',
+        'payload': ['entries_previous'],
+        'hide': False
+    },
+
+    'entries_stop': {
+        'title': 'Главное меню',
+        'payload': ['entries_stop'],
+        'hide': False
+    },
+
     # Hello
     'hello_new': {
         'title': '\U0001F525 Поехали',
@@ -130,16 +160,20 @@ SKILL_BUTTONS = {
 }
 
 
-CARDS = {
-    'card': {
-        'type': 'BigImage',
-        'image_id': '937455/659419eb30947371c9e1',
-        'title': 'Ваша статистика готова!',
-        'button': {
-            'text': 'Посмотреть статистику',
-            'url': f'{DOMEN}/statistic',
-        },
+ACTIVITIES_CARD = {
+    'type': 'ItemsList',
+    'header': {
+        'text': 'Ваши Активности'
+    },
+    'items': {
+
     }
+}
+
+ACTIVITY_ITEM = {
+    'image_id': None,
+    'title': None,
+    'description': None
 }
 
 MAIN_MENU_BUTTONS = [
@@ -172,4 +206,30 @@ END_ACTIVITY = [
     SKILL_BUTTONS['activity_end_no'],
     SKILL_BUTTONS['activity_end_yes_hide'],
     SKILL_BUTTONS['activity_end_no_hide']
+]
+
+STATISTIC_BUTTONS = [
+    SKILL_BUTTONS['get_visualisation'],
+    SKILL_BUTTONS['get_entries'],
+    SKILL_BUTTONS['back']
+]
+
+ENTRIES_BUTTONS_START = [
+    SKILL_BUTTONS['entries_continue'],
+    SKILL_BUTTONS['entries_stop']
+]
+
+ENTRIES_BUTTONS = [
+    SKILL_BUTTONS['entries_continue'],
+    SKILL_BUTTONS['entries_previous'],
+    SKILL_BUTTONS['entries_stop']
+]
+
+ENTRIES_BUTTONS_END = [
+    SKILL_BUTTONS['entries_previous'],
+    SKILL_BUTTONS['entries_stop']
+]
+
+ENTRIES_ONLY_ONE_PAGE = [
+    SKILL_BUTTONS['back']
 ]
