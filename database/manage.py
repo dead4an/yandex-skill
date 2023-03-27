@@ -4,7 +4,7 @@ import ydb.iam
 
 
 INSERT_CHECKIN = """
-DECLARE $id AS Uint64;
+DECLARE $id AS Utf8;
 DECLARE $user_id AS Utf8;
 DECLARE $start_time AS Utf8; 
 DECLARE $type AS Utf8; 
@@ -14,10 +14,12 @@ VALUES ($id, $user_id, $start_time, $type, $checkin_type);"""
 
 SELECT_CHECKINS = """
 DECLARE $user_id AS Utf8;
-SELECT (id, start_time, type, checkin_type) FROM checkins WHERE user_id=$user_id;"""
+SELECT id, start_time, type, checkin_type FROM checkins 
+WHERE user_id=$user_id
+ORDER BY start_time;"""
 
 INSERT_ACTIVITY = """
-DECLARE $id AS Uint64; 
+DECLARE $id AS Utf8; 
 DECLARE $user_id AS Utf8;
 DECLARE $activity_id AS Uint64; 
 DECLARE $start_time AS Utf8; 
@@ -31,8 +33,9 @@ VALUES ($id, $user_id, $activity_id, $start_time, $end_time, $duration, $activit
 SELECT_ACTIVITIES = """
 DECLARE $user_id AS Utf8;
 DECLARE $today_date AS Utf8;
-SELECT (id, user_id, activity_id, start_time, end_time, duration, activity_type, text)  
-FROM activities WHERE user_id=$user_id AND start_time > $today_date;"""
+SELECT id, user_id, activity_id, start_time, end_time, duration, activity_type, text  
+FROM activities WHERE user_id=$user_id AND start_time > $today_date 
+ORDER BY start_time DESC;"""
 
 INSERT_USER = """
 DECLARE $id AS Utf8;

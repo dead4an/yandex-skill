@@ -7,6 +7,7 @@ from .skill_texts import TEXTS
 from datetime import datetime as dt
 import pytz
 import random
+from uuid import uuid4
 
 
 # state 1: выбор функции
@@ -78,10 +79,7 @@ class DialogHandler:
                 self.close_activity(confirm_state=True)
                 return
 
-            if not self.checkins_list:
-                checkin_id = 0
-            else:
-                checkin_id = self.checkins_list[-1][0][0] + 1
+            checkin_id = str(uuid4())
 
             self.add_checkin(checkin_id, 'start', self.command)
             text = (
@@ -232,12 +230,11 @@ class DialogHandler:
             last_page = True
 
         for row in self.activities_list[start:start + 5]:
-            values = row[0]
-            activity_type = values[-2]
+            activity_type = row[-2]
             self.set_activity_name(activity_type)
-            start_time = dt.strptime(values[3], '%d-%m-%Y %H:%M:%S')
+            start_time = dt.strptime(row[3], '%d-%m-%Y %H:%M:%S')
             start_time = dt.strftime(start_time, '%H:%M:%S')
-            duration = self.get_time(timestamp=values[5])
+            duration = self.get_time(timestamp=row[-3])
 
             if activity_type == 'activity_work':
                 image_id = '213044/39799b3319bd0fb5135b'
@@ -294,12 +291,12 @@ class DialogHandler:
         self.activities_list = db.select_activities(self.__user_id, today_date)
 
     def close_activity(self, confirm_state=False):
-        self.set_activity_name(self.checkins_list[-1][0][-1])
+        self.set_activity_name(self.checkins_list[-1][-1])
         self.get_activities()
         buttons = MAIN_MENU_BUTTONS
 
-        checkin_id = self.checkins_list[-1][0][0] + 1
-        start_time = self.checkins_list[-1][0][1]
+        checkin_id = str(uuid4())
+        start_time = self.checkins_list[0][1]
         start_time = self.get_time(start_time)
         current_time = self.get_time(return_timestamp=True)
         activity_duration = current_time - start_time
@@ -308,7 +305,7 @@ class DialogHandler:
         current_time = dt.strftime(current_time, '%d-%m-%Y %H:%M:%S')
 
         activity_id = 0
-        general_activity_id = 0
+        general_activity_id = str(uuid4())
 
         activity_duration_date = self.get_time(timestamp=activity_duration)
 
@@ -320,12 +317,11 @@ class DialogHandler:
             return
 
         if self.activities_list:
-            activity_id = self.activities_list[-1][0][2] + 1
-            general_activity_id = self.activities_list[-1][0][0] + 1
+            activity_id = self.activities_list[0][2] + 1
 
         self.add_activity(general_activity_id, activity_id, start_time, current_time, activity_duration,
-                          self.checkins_list[-1][0][3], 'text')
-        self.add_checkin(checkin_id, 'stop', self.checkins_list[-1][0][3])
+                          self.checkins_list[0][3], 'text')
+        self.add_checkin(checkin_id, 'stop', self.checkins_list[0][3])
         text = f'Активность "{self.activity_name}" была завершена!'
 
         self.result = Response(text, buttons, session_state=1)
