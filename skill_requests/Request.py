@@ -34,7 +34,7 @@ class Request:
         elif self.session_state == 2:
             self.command = classify_command(nlu_tokens, METRICS['activity_types'])
         
-        elif self.session_state == 21:
+        elif self.session_state == 21 or self.session_state == 22:
             self.command = classify_command(nlu_tokens, METRICS['close_activity'])
 
         elif self.session_state == 3:
@@ -43,9 +43,8 @@ class Request:
         elif self.session_state >= 31:
             self.command = classify_command(nlu_tokens, METRICS['entries_view'])
 
-        elif self.session_state == 4:
+        elif self.session_state == 4 or self.session_state == 6:
             self.command = classify_command(nlu_tokens, METRICS['help'])
-
 
     def get_user_id(self):
         """ Возвращает id пользователя """

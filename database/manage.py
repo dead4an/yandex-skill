@@ -14,9 +14,17 @@ VALUES ($id, $user_id, $start_time, $type, $checkin_type);"""
 
 SELECT_CHECKINS = """
 DECLARE $user_id AS Utf8;
+DECLARE $today_date AS Utf8;
 SELECT id, start_time, type, checkin_type FROM checkins 
-WHERE user_id=$user_id
-ORDER BY start_time;"""
+WHERE user_id=$user_id and start_time > $today_date
+ORDER BY start_time DESC;"""
+
+DELETE_LAST_CHECKIN = """
+DECLARE $user_id AS Utf8;
+DECLARE $id AS Utf8;
+DELETE FROM checkins
+WHERE user_id=$user_id 
+AND id=$id"""
 
 INSERT_ACTIVITY = """
 DECLARE $id AS Utf8; 
@@ -86,10 +94,10 @@ class DatabaseManager:
 
         self.execute(query, params)
 
-    def select_checkins(self, user_id):
+    def select_checkins(self, user_id, today_date):
         """ Возвращает отметки пользователя """
         query = SELECT_CHECKINS
-        params = {'$user_id': user_id}
+        params = {'$user_id': user_id, '$today_date': today_date}
 
         result_set = self.execute(query, params)
         if not result_set or not result_set[0].rows:
@@ -101,6 +109,11 @@ class DatabaseManager:
             checkins_list.append(list(row.values()))
 
         return checkins_list
+
+    def delete_last_checkin(self, user_id, checkin_id):
+        query = DELETE_LAST_CHECKIN
+        params = {'$user_id': user_id, '$id': checkin_id}
+        self.execute(query, params)
 
     # Работа с активностями
     def insert_activity(self, id, user_id, activity_id, start_time, end_time,

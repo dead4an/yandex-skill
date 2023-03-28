@@ -2,6 +2,12 @@
 # Работает с токенами из запроса
 command_classifier_dict = {
     # Главное меню
+    'dev': {
+        'разработчик', 'разработчика', 'dev'
+    },
+    'dev_info': {
+        'проверяющих', 'dev_info'
+    },
     'help': {
         'навык', 'навыке', 'о', 'расскажи', 'гайд', 'научи', 'инструкция'
         'информация', 'help', 'помощь', 'как', 'пользоваться',
@@ -17,6 +23,9 @@ command_classifier_dict = {
         'статистика', 'статистику', 'график', 'диаграмма', 'гистограмма',
         'моя', 'мою', 'посмотреть', 'узнать', 'поделись', 'покажи',
         'показать', 'показывай', 'statistic'
+    },
+    'what_you_can': {
+        'что', 'ты', 'умеешь', 'можешь', 'what_you_can'
     },
 
     # Активности
@@ -102,7 +111,7 @@ command_classifier_dict = {
     'yes': {
         'да', 'ага', 'начать', 'начнём', 'давай', 'вперёд',
         'именно', 'продолжи', 'продолжай', 'угу', 'так',
-        'согласен', 'согласна', 'поехали', 'yes'
+        'согласен', 'согласна', 'поехали', 'yes', 'начнем',
     },
     'no': {
         'нет', 'не-а', 'не', 'отмени', 'отмена', 'верни',
@@ -114,15 +123,17 @@ command_classifier_dict = {
         'вернуться', 'назад', 'отменить', 'отмени', 'верни',
         'отмена', 'предыдущий', 'back'
     },
-    
+
     'back_to_menu': {
-        'главное', 'меню', 'в'
+        'главное', 'меню', 'в', 'back_to_menu'
     }
 }
 
 METRICS = {
     # Главное меню
-    'main_menu': ['yes', 'no', 'help', 'activities', 'statistic'],
+    'main_menu': ['yes', 'no', 'help', 'activities',
+                  'statistic', 'what_you_can', 'dev',
+                  'dev_info'],
 
     # Активности
     'activity_types': ['activity_work', 'activity_homework',
@@ -136,12 +147,14 @@ METRICS = {
                      'entries_stop', 'no', 'back_to_menu'],
 
     # Помощь
-    'help': ['about_skill', 'about_activities', 
+    'help': ['about_skill', 'about_activities',
              'about_statistic', 'back', 'back_to_menu']
 }
 
 
 def classify_command(tokens: list, metrics: list):
+    print('METRICS\n', metrics)
+    print(tokens)
     counter = {key: 0 for key in metrics}
     for metric in metrics:
         for token in tokens:
@@ -149,5 +162,7 @@ def classify_command(tokens: list, metrics: list):
                 counter[metric] += 1
 
     counter = list(sorted(counter.items(), key=lambda x: x[1]))
-    if counter[-1][1]: return counter[-1][0]
+    if counter[-1][1]:
+        return counter[-1][0]
+
     return 'none'
