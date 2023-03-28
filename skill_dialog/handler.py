@@ -81,7 +81,7 @@ class DialogHandler:
                 end_time = dt.strftime(end_time, '%d-%m-%Y %H:%M:%S')
                 db.insert_activity(
                     id=str(uuid4()), user_id=self.__user_id, activity_id=1,
-                    start_time=start_time, end_time=end_time, duration=3600, activity_type='unknown',
+                    start_time=start_time, end_time=end_time, duration=3600, activity_type='activity_work',
                     text='dev'
                 )
 
@@ -253,7 +253,9 @@ class DialogHandler:
         """ Команда не найдена """
         text = TEXTS['command_not_found']
         buttons = MAIN_MENU_BUTTONS
-        self.result = Response(text=text, buttons=buttons, session_state=1)
+        card = MAIN_MENU_CARD
+        card['header'].update({'text': text})
+        self.result = Response('', buttons, card, session_state=1, tts=text)
 
     def check_user_is_new(self):
         """ Проверка нового пользователя """
@@ -416,6 +418,9 @@ class DialogHandler:
         general_activity_id = str(uuid4())
         activity_duration_date = self.get_time(timestamp=activity_duration)
 
+        if activity_duration < 60:
+            activity_duration_date = 'меньше минуты'
+
         if confirm_state_std:
             text = f'Активность: {self.activity_name} \nНачало: {start_time_show}\n' \
                    f'Продолжительность: {activity_duration_date}\nХотите завершить активность?"'
@@ -468,7 +473,7 @@ class DialogHandler:
         )
         buttons = HELP_BUTTONS
         card = ABOUT_SKILL_CARD
-        self.result = Response('', buttons, card, session_state=6, tts=text)
+        self.result = Response('', buttons, card, session_state=6, tts=tts)
 
     def about_activities(self):
         text = TEXTS['about_activities']
