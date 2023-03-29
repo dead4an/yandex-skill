@@ -47,7 +47,6 @@ ORDER BY start_time DESC;"""
 
 INSERT_USER = """
 DECLARE $id AS Utf8;
-DECLARE $user_id AS Utf8;
 DECLARE $name AS Utf8;
 UPSERT INTO users (id, name) VALUES ($id, $name);"""
 
@@ -55,10 +54,22 @@ USER_EXISTS = """
 DECLARE $id AS Utf8;
 SELECT 1 FROM users WHERE id=$id LIMIT 1;"""
 
+CHECK_ACTIVITIES = """
+DECLARE $user_id AS Utf8;
+SELECT 1 FROM activities WHERE user_id=$user_id LIMIT 1;"""
+
+SELECT_LAST_ACTIVITY_ID = """
+DECLARE $user_id AS Utf8;
+DECLARE $today_date AS Utf8;
+SELECT activity_id, start_time
+FROM activities WHERE user_id=$user_id AND start_time > $today_date 
+ORDER BY start_time DESC
+LIMIT 1;"""
+
 
 class DatabaseManager:
-
-    def execute(self, query, params):
+    @staticmethod
+    def execute(query, params):
         with ydb.Driver(
             endpoint=os.getenv('ENDPOINT'),
             database=os.getenv('DATABASE'),
@@ -111,6 +122,7 @@ class DatabaseManager:
         return checkins_list
 
     def delete_last_checkin(self, user_id, checkin_id):
+        """ Удаление последней отметки """
         query = DELETE_LAST_CHECKIN
         params = {'$user_id': user_id, '$id': checkin_id}
         self.execute(query, params)
@@ -143,6 +155,28 @@ class DatabaseManager:
 
         return activities_list
 
+    def select_last_activity_id(self, user_id, today_date):
+        """ Возвращает id последней активности """
+        query = SELECT_LAST_ACTIVITY_ID
+        params = {'$user_id': user_id, "$today_date": today_date}
+        result_set = self.execute(query, params)
+
+        if not result_set or not result_set[0].rows:
+            return 0
+
+        return result_set[0].rows[0][0]
+
+    def check_activity(self, user_id):
+        """ Проверяет наличие хотя бы одной активности у пользователя """
+        query = CHECK_ACTIVITIES
+        params = {'$user_id': user_id}
+        result_set = self.execute(query, params)
+
+        if not result_set or not result_set[0].rows:
+            return None
+
+        return True
+
     # Работа с пользователями
     def insert_user(self, user_id, name):
         query = INSERT_USER
@@ -150,6 +184,7 @@ class DatabaseManager:
         self.execute(query, params)
 
     def check_user_exists(self, user_id):
+        """ Проверяет наличие пользователя в базе данных """
         query = USER_EXISTS
         params = {'$id': user_id}
         result_set = self.execute(query, params)

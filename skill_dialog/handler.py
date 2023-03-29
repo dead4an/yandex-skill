@@ -11,7 +11,7 @@ from datetime import datetime as dt
 import pytz
 import random
 from uuid import uuid4
-
+import os
 
 # state 1: выбор функции
 # state 2: переключение на нужную функцию
@@ -32,6 +32,7 @@ class DialogHandler:
         self.activities_list = None
         self.activity_name = None
         self.result = None
+        self.o_token = os.getenv('O_AUTH')
 
         self.check_user_is_new()
         self.get_checkins()
@@ -164,7 +165,6 @@ class DialogHandler:
                 self.main_menu()
 
         elif self.session_state == 3:
-            self.get_activities()
             if self.command == 'get_entries':
                 text = ''
                 activities_card, last_page = self.get_activities_card(0)
@@ -175,16 +175,9 @@ class DialogHandler:
                 self.result = Response(text, ENTRIES_BUTTONS_START, activities_card, session_state=31)
 
             elif self.command == 'get_visualisation':
-                text = 'Конечно же это не реализовано. Важнейшая фишка навыка не реализована. ' \
-                       'Прекрасно. Но всё же. До встречи в итоговой версии!'
-                tts = 'sil <[250]> Конечно же это не реализовано. sil <[750]>  Важнейшая фишка навыка не ' \
-                      'реализована. sil <[750]>' \
-                      'Зато несколько дней было потрачено на деплой навыка во всевозможных ' \
-                      'местах. sil <[750]> Прекрасно. sil <[750]> Но всё же. sil <[300]>' \
-                      'До встречи в итоговой версии!'
                 card = MAIN_MENU_CARD
-                card['header'].update({'text': text})
-                self.result = Response(text, MAIN_MENU_BUTTONS, card, session_state=1, tts=tts)
+                card['header'].update({'text': 'Вот ваша статистика'})
+                self.result = Response('', MAIN_MENU_BUTTONS, card, session_state=1)
 
             elif self.command in ['back', 'back_to_menu']:
                 self.main_menu()
@@ -282,7 +275,7 @@ class DialogHandler:
     def main_menu(self, new_session=False):
         """ Главаное меню навыка """
         text = random.choice(TEXTS['hello_std'])
-        tts = 'sil <[250]> Если хотите начать или закончить активность - скажите "Активность". ' \
+        tts = 'Если хотите начать или закончить активность - скажите "Активность". ' \
               'sil <[250]> Хотите узнать свою статистику? Скажите "Статистика" и я покажу её вам. ' \
               'sil <[250]> Скажите "Помощь", если хотите узнать о навыке больше'
 
@@ -309,6 +302,7 @@ class DialogHandler:
 
     # Активности
     def activities(self):
+        """ Раздел активностей """
         text = random.choice(TEXTS['activities_rand'])
         tts = text + TEXTS['activities']
         buttons = ACTIVITY_TYPES
@@ -317,11 +311,11 @@ class DialogHandler:
         self.result = Response('', buttons, card, session_state=2, tts=tts)
 
     def statistic(self):
-        self.get_activities()
         text = 'Хотите увидеть визуализацию или посмотреть записи об Активностях?'
         buttons = STATISTIC_BUTTONS
+        db = DatabaseManager()
 
-        if not self.activities_list:
+        if not db.check_activity(self.__user_id):
             text = 'Похоже, сегодня Вы ещё не закончили ни одной активности! '
             tts = f'{text}{TEXTS["main_menu"]}'
             buttons = MAIN_MENU_BUTTONS
@@ -333,8 +327,9 @@ class DialogHandler:
         self.result = Response(text, buttons, session_state=3)
 
     def get_activities_card(self, start):
-        activity_items = []
+        """ Возвращает карточку со списком последних активностей """
         self.get_activities()
+        activity_items = []
         entries_count = len(self.activities_list)
         last_page = False
         if entries_count <= start + 5:
@@ -381,29 +376,33 @@ class DialogHandler:
         return activities_card, last_page
 
     def add_checkin(self, checkin_id, checkin_type, activity_type):
+        """ Добавление отметки о начале | конце активности """
         db = DatabaseManager()
         current_time = self.get_time()
         db.insert_checkin(checkin_id, self.__user_id, current_time, checkin_type, activity_type)
 
     def get_checkins(self):
+        """ Возвращает все отметки """
         db = DatabaseManager()
-        today_date = dt.strftime(dt.date(self.get_time(return_timestamp=True, tz_m=True)), '%d-%m-%Y')
+        today_date = dt.strftime(dt.date(self.get_time(return_timestamp=True)), '%d-%m-%Y')
         self.checkins_list = db.select_checkins(self.__user_id, today_date)
 
-    def add_activity(self, general_id, activity_id, start_time, end_time, duration,
-                     activity_type, text):
+    def add_activity(self, general_id, activity_id, start_time, end_time,
+                     duration, activity_type, text):
+        """ Добавление записи об активности """
         db = DatabaseManager()
         db.insert_activity(general_id, self.__user_id, activity_id, start_time, end_time,
                            duration, activity_type, text)
 
     def get_activities(self):
+        """ Возвращает все записи об активностях """
         db = DatabaseManager()
-        today_date = dt.strftime(dt.date(self.get_time(return_timestamp=True, tz_m=True)), '%d-%m-%Y')
+        today_date = dt.strftime(dt.date(self.get_time(return_timestamp=True)), '%d-%m-%Y')
         self.activities_list = db.select_activities(self.__user_id, today_date)
 
     def close_activity(self, confirm_state_std=False):
         self.set_activity_name(self.checkins_list[0][-1])
-        self.get_activities()
+        db = DatabaseManager()
         buttons = MAIN_MENU_BUTTONS
         checkin_id = str(uuid4())
         start_time = self.checkins_list[0][1]
@@ -414,9 +413,10 @@ class DialogHandler:
         start_time_write = dt.strftime(start_time, '%d-%m-%Y %H:%M:%S')
         start_time_show = dt.strftime(start_time, '%H:%M:%S')
         current_time = dt.strftime(current_time, '%d-%m-%Y %H:%M:%S')
-        activity_id = 0
         general_activity_id = str(uuid4())
         activity_duration_date = self.get_time(timestamp=activity_duration)
+        today_date = dt.strftime(dt.date(self.get_time(return_timestamp=True)), '%d-%m-%Y')
+        last_activity_id = db.select_last_activity_id(self.__user_id, today_date)
 
         if activity_duration < 60:
             activity_duration_date = 'меньше минуты'
@@ -436,10 +436,7 @@ class DialogHandler:
             self.result = Response(text, buttons, session_state=22)
             return
 
-        if self.activities_list:
-            activity_id = self.activities_list[0][2] + 1
-
-        self.add_activity(general_activity_id, activity_id, start_time_write, current_time, activity_duration,
+        self.add_activity(general_activity_id, last_activity_id + 1, start_time_write, current_time, activity_duration,
                           self.checkins_list[0][3], 'text')
         self.add_checkin(checkin_id, 'stop', self.checkins_list[0][3])
         text = f'Активность "{self.activity_name}" была завершена!'

@@ -1,5 +1,7 @@
 # Словарь для классификации запроса (cheap-NLP)
 # Работает с токенами из запроса
+import time
+
 command_classifier_dict = {
     # Главное меню
     'dev': {
@@ -153,8 +155,6 @@ METRICS = {
 
 
 def classify_command(tokens: list, metrics: list):
-    print('METRICS\n', metrics)
-    print(tokens)
     counter = {key: 0 for key in metrics}
     for metric in metrics:
         for token in tokens:

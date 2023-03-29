@@ -343,6 +343,11 @@ ABOUT_STATISTIC_CARD = {
     )
 }
 
+STATISTIC_VISUAL_CARD = {
+    'type': 'BigImage',
+    'image_id': None
+}
+
 MAIN_MENU_BUTTONS = [
     SKILL_BUTTONS['activities'],
     SKILL_BUTTONS['statistic'],
