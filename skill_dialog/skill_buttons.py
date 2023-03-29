@@ -119,16 +119,23 @@ SKILL_BUTTONS = {
         'payload': ['statistic'],
         'hide': True
     },
-    'get_visualisation': {
-        'title': 'Визуализация',
-        'payload': ['get_visualisation'],
-        'hide': False
-    },
     'get_entries': {
-        'title': 'Список активностей',
+        'title': 'Подробная статистика',
         'payload': ['get_entries'],
         'hide': False
     },
+    'get_daily_statistic': {
+        'title': 'Сегодня',
+        'payload': ['get_daily_statistic'],
+        'hide': False
+    },
+    'get_weekly_statistic': {
+        'title': 'Неделя',
+        'payload': ['get_weekly_statistic'],
+        'hide': True
+    },
+
+    # Statistic pagination
     'entries_continue': {
         'title': 'Следующая страница',
         'payload': ['entries_continue'],
@@ -164,9 +171,19 @@ STATISTIC_ACTIVITIES_CARD = {
     'header': {
         'text': 'Ваши Активности'
     },
-    'items': {
+    'items': [
 
-    }
+    ]
+}
+
+DAILY_STATISTIC_CARD = {
+    'type': 'ItemsList',
+    'header': {
+        'text': 'Ваша статистика за сегодня'
+    },
+    'items': [
+
+    ]
 }
 
 WHAT_YOU_CAN_CARD = {
@@ -343,10 +360,6 @@ ABOUT_STATISTIC_CARD = {
     )
 }
 
-STATISTIC_VISUAL_CARD = {
-    'type': 'BigImage',
-    'image_id': None
-}
 
 MAIN_MENU_BUTTONS = [
     SKILL_BUTTONS['activities'],
@@ -380,8 +393,9 @@ END_ACTIVITY = [
 ]
 
 STATISTIC_BUTTONS = [
-    SKILL_BUTTONS['get_visualisation'],
     SKILL_BUTTONS['get_entries'],
+    SKILL_BUTTONS['get_daily_statistic'],
+    SKILL_BUTTONS['get_weekly_statistic'],
     SKILL_BUTTONS['back']
 ]
 

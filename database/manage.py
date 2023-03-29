@@ -47,8 +47,7 @@ ORDER BY start_time DESC;"""
 
 INSERT_USER = """
 DECLARE $id AS Utf8;
-DECLARE $name AS Utf8;
-UPSERT INTO users (id, name) VALUES ($id, $name);"""
+UPSERT INTO users (id, name) VALUES ($id);"""
 
 USER_EXISTS = """
 DECLARE $id AS Utf8;
@@ -178,9 +177,9 @@ class DatabaseManager:
         return True
 
     # Работа с пользователями
-    def insert_user(self, user_id, name):
+    def insert_user(self, user_id):
         query = INSERT_USER
-        params = {'$id': user_id, '$name': name}
+        params = {'$id': user_id}
         self.execute(query, params)
 
     def check_user_exists(self, user_id):

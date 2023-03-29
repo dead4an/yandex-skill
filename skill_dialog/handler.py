@@ -4,7 +4,8 @@ from .skill_buttons import MAIN_MENU_BUTTONS, HELP_BUTTONS, \
     ACTIVITY_TYPES, END_ACTIVITY, STATISTIC_BUTTONS, ENTRIES_BUTTONS_START, \
     ENTRIES_BUTTONS, ENTRIES_BUTTONS_END, ENTRIES_ONLY_ONE_PAGE, STATISTIC_ACTIVITIES_CARD, \
     WHAT_YOU_CAN_CARD, POSSIBILITIES_BUTTONS, MAIN_MENU_CARD, HELLO_NEW_BUTTONS, \
-    ACTIVITIES_CARD, ABOUT_SKILL_CARD, ABOUT_ACTIVITIES_CARD, ABOUT_STATISTIC_CARD
+    ACTIVITIES_CARD, ABOUT_SKILL_CARD, ABOUT_ACTIVITIES_CARD, ABOUT_STATISTIC_CARD, \
+    DAILY_STATISTIC_CARD
 
 from .skill_texts import TEXTS
 from datetime import datetime as dt
@@ -76,7 +77,7 @@ class DialogHandler:
 
             elif self.command == 'dev':
                 db = DatabaseManager()
-                start_time = self.get_time(return_timestamp=True, tz_m=True)
+                start_time = self.get_time(return_timestamp=True)
                 end_time = start_time + pytz.HOUR
                 start_time = dt.strftime(start_time, '%d-%m-%Y %H:%M:%S')
                 end_time = dt.strftime(end_time, '%d-%m-%Y %H:%M:%S')
@@ -174,10 +175,8 @@ class DialogHandler:
 
                 self.result = Response(text, ENTRIES_BUTTONS_START, activities_card, session_state=31)
 
-            elif self.command == 'get_visualisation':
-                card = MAIN_MENU_CARD
-                card['header'].update({'text': 'Вот ваша статистика'})
-                self.result = Response('', MAIN_MENU_BUTTONS, card, session_state=1)
+            elif self.command == 'get_daily_statistic':
+                self.get_daily_activities_card()
 
             elif self.command in ['back', 'back_to_menu']:
                 self.main_menu()
@@ -193,10 +192,8 @@ class DialogHandler:
                                            session_state=self.session_state + 1)
                     return
                 else:
-                    self.result = Response(
-                        text, ENTRIES_BUTTONS, activities_card,
-                        session_state=self.session_state + 1
-                    )
+                    self.result = Response(text, ENTRIES_BUTTONS, activities_card,
+                                           session_state=self.session_state + 1)
 
             elif self.command == 'entries_previous' and self.session_state == 32:
                 text = ''
@@ -213,12 +210,6 @@ class DialogHandler:
 
             elif self.command in ['entries_stop', 'no', 'back_to_menu']:
                 self.main_menu()
-
-        # Раздел статистики (Визуализация)
-        elif self.session_state == 30:
-            text = 'Not realized'
-            buttons = MAIN_MENU_BUTTONS
-            self.result = Response(text, buttons, session_state=1)
 
         # Что ты умеешь
         elif self.session_state == 4:
@@ -242,6 +233,10 @@ class DialogHandler:
             elif self.command in 'back' or 'back_to_menu':
                 self.main_menu()
 
+        # Статистика за день
+        elif self.session_state == 7:
+            self.main_menu()
+
     def command_not_found(self):
         """ Команда не найдена """
         text = TEXTS['command_not_found']
@@ -255,7 +250,7 @@ class DialogHandler:
         db = DatabaseManager()
         self.user_exists = db.check_user_exists(self.__user_id)
         if not self.user_exists:
-            db.insert_user(self.__user_id, 'Denis')
+            db.insert_user(self.__user_id)
 
     def respond(self):
         return self.result.respond()
@@ -375,6 +370,62 @@ class DialogHandler:
         activities_card.update({'items': activity_items})
         return activities_card, last_page
 
+    def get_daily_activities_card(self):
+        """ Возвращает карточку с общей статистикой за день"""
+        self.get_activities()
+        activities_duration = {
+            'activity_work': 0, 'activity_homework': 0, 'activity_hobby': 0,
+            'activity_sport': 0, 'activity_other': 0
+        }
+
+        for row in self.activities_list:
+            activitity_type = row[-2]
+            activity_duration = row[-3]
+            activities_duration[activitity_type] += activity_duration
+
+        work_duration = self.get_time(timestamp=activities_duration['activity_work'])
+        homework_duration = self.get_time(timestamp=activities_duration['activity_homework'])
+        hobby_duration = self.get_time(timestamp=activities_duration['activity_hobby'])
+        sport_duration = self.get_time(timestamp=activities_duration['activity_sport'])
+        other_duration = self.get_time(timestamp=activities_duration['activity_other'])
+
+        activities_cards = []
+        if activities_duration['activity_work']:
+            activities_cards.append({
+                'image_id': '213044/39799b3319bd0fb5135b',
+                'title': 'Работа',
+                'description': f'Общее время занятия работой: {work_duration}'
+            })
+        if activities_duration['activity_homework']:
+            activities_cards.append({
+                'image_id': '213044/1ad7f49599385016222d',
+                'title': 'Домашние Дела',
+                'description': f'Общее время занятия домашними делами: {homework_duration}'
+            })
+        if activities_duration['activity_hobby']:
+            activities_cards.append({
+                'image_id': '213044/b85af62b5e29b538daca',
+                'title': 'Хобби',
+                'description': f'Общее время занятия хобби: {hobby_duration}'
+            })
+        if activities_duration['activity_sport']:
+            activities_cards.append({
+                'image_id': '213044/d458652c075b18128692',
+                'title': 'Спорт',
+                'description': f'Общее время занятия спортом: {sport_duration}'
+            })
+        if activities_duration['activity_other']:
+            activities_cards.append({
+                'image_id': '1030494/edca956f6dd3f17aa057',
+                'title': 'Разное',
+                'description': f'Общее время занятия разными делами: {other_duration}'
+            })
+
+        buttons = ENTRIES_ONLY_ONE_PAGE
+        daily_card = DAILY_STATISTIC_CARD
+        daily_card.update({'items': activities_cards})
+        self.result = Response('', buttons, daily_card, session_state=7)
+
     def add_checkin(self, checkin_id, checkin_type, activity_type):
         """ Добавление отметки о начале | конце активности """
         db = DatabaseManager()
@@ -403,27 +454,30 @@ class DialogHandler:
     def close_activity(self, confirm_state_std=False):
         self.set_activity_name(self.checkins_list[0][-1])
         db = DatabaseManager()
-        buttons = MAIN_MENU_BUTTONS
-        checkin_id = str(uuid4())
-        start_time = self.checkins_list[0][1]
-        start_time = self.get_time(start_time)
-        current_time = self.get_time(return_timestamp=True)
-        activity_duration = current_time - start_time
-        activity_duration = int(activity_duration.total_seconds())
-        start_time_write = dt.strftime(start_time, '%d-%m-%Y %H:%M:%S')
-        start_time_show = dt.strftime(start_time, '%H:%M:%S')
-        current_time = dt.strftime(current_time, '%d-%m-%Y %H:%M:%S')
-        general_activity_id = str(uuid4())
-        activity_duration_date = self.get_time(timestamp=activity_duration)
         today_date = dt.strftime(dt.date(self.get_time(return_timestamp=True)), '%d-%m-%Y')
         last_activity_id = db.select_last_activity_id(self.__user_id, today_date)
 
+        # UUID
+        checkin_id = str(uuid4())
+        general_activity_id = str(uuid4())
+
+        # Временные преобразования
+        activity_start_time = self.checkins_list[0][1]
+        activity_start_time = self.get_time(activity_start_time)
+        current_time = self.get_time(return_timestamp=True)
+        activity_duration = current_time - activity_start_time
+        activity_duration = int(activity_duration.total_seconds())
+        start_time_write = dt.strftime(activity_start_time, '%d-%m-%Y %H:%M:%S')
+        start_time_show = dt.strftime(activity_start_time, '%H:%M:%S')
+        current_time = dt.strftime(current_time, '%d-%m-%Y %H:%M:%S')
+        activity_duration_timestamp = self.get_time(timestamp=activity_duration)
+
         if activity_duration < 60:
-            activity_duration_date = 'меньше минуты'
+            activity_duration_timestamp = 'меньше минуты'
 
         if confirm_state_std:
             text = f'Активность: {self.activity_name} \nНачало: {start_time_show}\n' \
-                   f'Продолжительность: {activity_duration_date}\nХотите завершить активность?"'
+                   f'Продолжительность: {activity_duration_timestamp}\nХотите завершить активность?"'
             buttons = END_ACTIVITY
             self.result = Response(text, buttons, session_state=21)
             return
@@ -440,6 +494,7 @@ class DialogHandler:
                           self.checkins_list[0][3], 'text')
         self.add_checkin(checkin_id, 'stop', self.checkins_list[0][3])
         text = f'Активность "{self.activity_name}" была завершена!'
+        buttons = MAIN_MENU_BUTTONS
         card = MAIN_MENU_CARD
         card['header'].update({'text': text})
         tts = f'Активность "{self.activity_name}" была завершена! Если хотите начать ' \
@@ -484,12 +539,10 @@ class DialogHandler:
         self.result = Response('', buttons, card, session_state=6, tts=text)
 
     @staticmethod
-    def get_time(time=None, return_timestamp=False, timestamp=None, tz_m=False):
+    def get_time(time=None, return_timestamp=False, timestamp=None):
         """ Возвращает текущее время, либо преобразует str в timestamp """
         # tz = pytz.timezone(self.timezone) ВЕРНУТЬ В РЕЛИЗЕ
         tz = pytz.timezone('Europe/Moscow')
-        if tz_m:
-            tz = pytz.timezone('Europe/Moscow')
         if time:
             return dt.strptime(time, '%d-%m-%Y %H:%M:%S')
 
