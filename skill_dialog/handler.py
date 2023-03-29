@@ -462,7 +462,6 @@ class DialogHandler:
         self.result = Response('', buttons, card, session_state=4, tts=tts)
 
     def about_skill(self):
-        text = TEXTS['about_skill']
         tts = (
             'Этот навык призван помочь Вам следить за тем, как Вы распределяете своё время. Если Вы активная '
             'личность, дорожащая каждой минутой и желающая оценить свои временн+ые затраты - Контроль Времени '
@@ -487,7 +486,8 @@ class DialogHandler:
         card = ABOUT_STATISTIC_CARD
         self.result = Response('', buttons, card, session_state=6, tts=text)
 
-    def get_time(self, time=None, return_timestamp=False, timestamp=None, tz_m=False):
+    @staticmethod
+    def get_time(time=None, return_timestamp=False, timestamp=None, tz_m=False):
         """ Возвращает текущее время, либо преобразует str в timestamp """
         # tz = pytz.timezone(self.timezone) ВЕРНУТЬ В РЕЛИЗЕ
         tz = pytz.timezone('Europe/Moscow')
