@@ -50,26 +50,6 @@ SKILL_BUTTONS = {
         'payload': ['activities'],
         'hide': True
     },
-    'activity_work': {
-        'title': '\U0001F4BC Работа',
-        'payload': ['activity_work'],
-        'hide': False
-    },
-    'activity_homework': {
-        'title': '\U0001F3E0 Домашние Дела',
-        'payload': ['activity_homework'],
-        'hide': False
-    },
-    'activity_hobby': {
-        'title': '\U0001f3ae Хобби',
-        'payload': ['activity_hobby'],
-        'hide': False
-    },
-    'activity_sport': {
-        'title': '\U0001F3BE Спорт',
-        'payload': ['activity_sport'],
-        'hide': False
-    },
     'activity_work_hide': {
         'title': 'Работа',
         'payload': ['activity_work'],
@@ -86,7 +66,6 @@ SKILL_BUTTONS = {
         'payload': ['activity_hobby'],
         'hide': True
     },
-
     'activity_sport_hide': {
         'title': 'Спорт',
         'payload': ['activity_sport'],

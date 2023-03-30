@@ -47,6 +47,13 @@ command_classifier_dict = {
         'спортивная', 'спорту', 'спортивные',
         'спорте', 'физические', 'упражнения',
     },
+    'activity_other': {
+        'прочее', 'остальное', 'другое',
+        'разное', 'прочая', 'прочую',
+        'разности', 'activity_other'
+    },
+
+    # Завершение актинвости
     'close_activity': {
         'закончить', 'стоп', 'остановить', 'завершить',
         'конец', 'закончила', 'закончил', 'закончи',
@@ -134,7 +141,8 @@ METRICS = {
 
     # Активности
     'activity_types': ['activity_work', 'activity_homework',
-                       'activity_hobby', 'activity_sport', 'back'],
+                       'activity_hobby', 'activity_sport',
+                       'activity_other', 'back'],
     'close_activity': ['close_activity', 'continue_activity'],
 
     # Статистика
