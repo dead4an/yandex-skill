@@ -302,11 +302,9 @@ class DialogHandler:
         self.result = Response('', buttons, card, session_state=2, tts=tts)
 
     def statistic(self):
-        text = 'Хотите увидеть визуализацию или посмотреть записи об Активностях?'
-        buttons = STATISTIC_BUTTONS
+        today_date = dt.strftime(dt.date(self.get_time(return_timestamp=True)), '%d-%m-%Y')
         db = DatabaseManager()
-
-        if not db.check_activity(self.__user_id):
+        if not db.check_activity(self.__user_id, today_date):
             text = 'Похоже, сегодня Вы ещё не закончили ни одной активности! '
             tts = f'{text}{TEXTS["main_menu"]}'
             buttons = MAIN_MENU_BUTTONS
@@ -315,6 +313,8 @@ class DialogHandler:
             self.result = Response('', buttons, card, session_state=1, tts=tts)
             return
 
+        text = 'Хотите увидеть визуализацию или посмотреть записи об Активностях?'
+        buttons = STATISTIC_BUTTONS
         self.result = Response(text, buttons, session_state=3)
 
     def get_activities_card(self, start):

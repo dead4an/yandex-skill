@@ -42,7 +42,8 @@ SELECT_ACTIVITIES = """
 DECLARE $user_id AS Utf8;
 DECLARE $today_date AS Utf8;
 SELECT id, user_id, activity_id, start_time, end_time, duration, activity_type, text  
-FROM activities WHERE user_id=$user_id AND start_time > $today_date 
+FROM activities WHERE user_id=$user_id 
+AND start_time >= $today_date 
 ORDER BY start_time DESC;"""
 
 INSERT_USER = """
@@ -55,7 +56,11 @@ SELECT 1 FROM users WHERE id=$id LIMIT 1;"""
 
 CHECK_ACTIVITIES = """
 DECLARE $user_id AS Utf8;
-SELECT 1 FROM activities WHERE user_id=$user_id LIMIT 1;"""
+DECLARE $today_date AS Utf8;
+SELECT 1 FROM activities 
+WHERE user_id=$user_id
+AND start_time >= $today_date 
+LIMIT 1;"""
 
 SELECT_LAST_ACTIVITY_ID = """
 DECLARE $user_id AS Utf8;
@@ -161,13 +166,16 @@ class DatabaseManager:
 
         return result_set[0].rows[0][0]
 
-    def check_activity(self, user_id):
-        """ Проверяет наличие хотя бы одной активности у пользователя """
+    def check_activity(self, user_id, today_date):
+        """ Проверяет наличие хотя бы одной активности у пользователя
+        за сегодня """
         query = CHECK_ACTIVITIES
-        params = {'$user_id': user_id}
+        params = {'$user_id': user_id, '$today_date': today_date}
         result_set = self.execute(query, params)
 
+        print(result_set[0].rows)
         if not result_set or not result_set[0].rows:
+            print('none')
             return None
 
         return True
