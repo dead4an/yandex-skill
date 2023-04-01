@@ -12,7 +12,6 @@ def main(event, context):
     command = req.get_command()
     session_state, session_is_new = req.get_session_info()
     timezone = req.get_timezone()
-
     # Подготовка ответа
     dialog = DialogHandler(
         user_id, command, session_state,

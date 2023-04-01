@@ -2,144 +2,118 @@
 SKILL_BUTTONS = {
     'dev': {
         'title': 'DEV|Проверяющий: добавить активность длиною в час',
-        'payload': ['dev'],
-        'hide': False
-    },
-    'dev_info': {
-        'title': 'DEV|Проверяющий: информация для проверяющих',
-        'payload': ['dev_info'],
         'hide': False
     },
     'main_menu': {
         'title': 'Главное меню',
-        'payload': ['back_to_menu'],
         'hide': True
     },
 
     # About
     'help': {
         'title': '\U0001F4D6 Помощь',
-        'payload': ['help'],
         'hide': True
     },
     'about_skill': {
         'title': 'О навыке',
-        'payload': ['about_skill'],
         'hide': True
     },
     'about_activities': {
         'title': 'Об активностях',
-        'payload': ['about_activities'],
         'hide': True
     },
     'about_statistic': {
         'title': 'О статистике',
-        'payload': ['about_statistic'],
         'hide': True
     },
 
     'what_you_can': {
         'title': 'Что ты умеешь?',
-        'payload': ['what_you_can'],
         'hide': True
     },
 
     # Activities
     'activities': {
         'title': '\U00002705 Активности',
-        'payload': ['activities'],
         'hide': True
     },
-    'activity_work_hide': {
+    'activity_work': {
         'title': 'Работа',
-        'payload': ['activity_work'],
         'hide': True
     },
-    'activity_homework_hide': {
+    'activity_homework': {
         'title': 'Домашние Дела',
-        'payload': ['activity_homework'],
         'hide': True
     },
 
-    'activity_hobby_hide': {
+    'activity_hobby': {
         'title': 'Хобби',
-        'payload': ['activity_hobby'],
         'hide': True
     },
-    'activity_sport_hide': {
+    'activity_sport': {
         'title': 'Спорт',
-        'payload': ['activity_sport'],
+        'hide': True
+    },
+    'activity_other': {
+        'title': 'Прочее',
         'hide': True
     },
     'activity_end_yes': {
         'title': '\U00002705 Завершить активность',
-        'payload': ['close_activity'],
         'hide': False
     },
     'activity_end_no': {
         'title': '\U0000274C Отмена',
-        'payload': ['continue_activity'],
         'hide': False
     },
     'activity_end_yes_hide': {
         'title': 'Завершить активность',
-        'payload': ['close_activity'],
         'hide': True
     },
     
     'activity_end_no_hide': {
         'title': 'Отмена',
-        'payload': ['continue_activity'],
         'hide': True
     },
     # Statistic
     'statistic': {
         'title': '\U0001F4CA Статистика',
-        'payload': ['statistic'],
         'hide': True
     },
     'get_entries': {
         'title': 'Подробная статистика',
-        'payload': ['get_entries'],
         'hide': False
     },
     'get_daily_statistic': {
         'title': 'Сегодня',
-        'payload': ['get_daily_statistic'],
         'hide': False
     },
     'get_weekly_statistic': {
         'title': 'Неделя',
-        'payload': ['get_weekly_statistic'],
         'hide': True
     },
 
     # Statistic pagination
     'entries_continue': {
         'title': 'Следующая страница',
-        'payload': ['entries_continue'],
         'hide': False
     },
     'entries_previous': {
         'title': 'Предыдущая страница',
-        'payload': ['entries_previous'],
         'hide': False
     },
     'entries_stop': {
         'title': 'Главное меню',
-        'payload': ['entries_stop'],
         'hide': False
     },
 
     # Other
     'hello_new_hide': {
         'title': '\U0001F525 Поехали',
-        'payload': ['yes'],
         'hide': True
     },
     'back': {
         'title': 'Назад',
-        'payload': ['back'],
         'hide': True
     }
 }
@@ -176,7 +150,7 @@ WHAT_YOU_CAN_CARD = {
             'title': 'Главное меню',
             'description': 'Перейдите в интересующий вас раздел',
             'button': {
-                'payload': ['back_to_menu']
+                'title': 'В главное меню'
             }
         },
         {
@@ -184,7 +158,7 @@ WHAT_YOU_CAN_CARD = {
             'title': 'Активности',
             'description': 'Здесь вы можете начать или закончить Активность. Хотите узнать больше?',
             'button': {
-                'payload': ['about_activities']
+                'title': 'Об активностях'
             }
         },
         {
@@ -193,7 +167,7 @@ WHAT_YOU_CAN_CARD = {
             'description': 'В этом разделе вы сможете взглянуть на результаты своих трудов. '
                            'Рассказать о нём?',
             'button': {
-                'payload': ['about_statistic']
+                'title': 'О статистике'
             }
         },
         {
@@ -201,7 +175,7 @@ WHAT_YOU_CAN_CARD = {
             'title': 'Навык',
             'description': 'Если хотите узнать больше о навыке, то вам сюда',
             'button': {
-                'payload': ['about_skill']
+                'title': 'О навыке'
             }
         }
     ],
@@ -218,8 +192,7 @@ MAIN_MENU_CARD = {
             'title': 'Активности',
             'description': 'Здесь вы можете начать или закончить Активность',
             'button': {
-                'text': 'Активности',
-                'payload': ['activities']
+                'text': 'Активности'
             }
         },
         {
@@ -227,8 +200,7 @@ MAIN_MENU_CARD = {
             'title': 'Статистика',
             'description': 'В этом разделе вы сможете взглянуть на результаты своих трудов',
             'button': {
-                'text': 'Статистика',
-                'payload': ['statistic']
+                'text': 'Статистика'
             }
         },
         {
@@ -236,11 +208,13 @@ MAIN_MENU_CARD = {
             'title': 'Помощь',
             'description': 'Узнайте больше о навыке',
             'button': {
-                'text': 'Помощь',
-                'payload': ['help']
+                'text': 'Помощь'
             }
         }
-    ]
+    ],
+    'footer': {
+
+    }
 }
 
 ACTIVITIES_CARD = {
@@ -254,8 +228,7 @@ ACTIVITIES_CARD = {
             'title': 'Работа',
             'description': 'Все мы ждём выходных, а пока трудимся',
             'button': {
-                'text': 'Работа',
-                'payload': ['activity_work']
+                'text': 'Работа'
             }
         },
         {
@@ -263,8 +236,7 @@ ACTIVITIES_CARD = {
             'title': 'Домашние Дела',
             'description': 'Иногда нужно уделять время и дому',
             'button': {
-                'text': 'Домашние Дела',
-                'payload': ['activity_homework']
+                'text': 'Домашние Дела'
             }
         },
         {
@@ -272,8 +244,7 @@ ACTIVITIES_CARD = {
             'title': 'Хобби',
             'description': 'Кто откажется от любимого занятия?',
             'button': {
-                'text': 'Хобби',
-                'payload': ['activity_hobby']
+                'text': 'Хобби'
             }
         },
         {
@@ -282,8 +253,7 @@ ACTIVITIES_CARD = {
             'description': 'Поддерживайте тело в хорошей форме, а '
                            'оно поддержит Вас!',
             'button': {
-                'text': 'Спорт',
-                'payload': ['activity_sport']
+                'text': 'Спорт'
             }
         },
         {
@@ -291,8 +261,7 @@ ACTIVITIES_CARD = {
             'title': 'Прочее',
             'description': 'Всякая, но не менее важная, всячина',
             'button': {
-                'text': 'Прочее',
-                'payload': ['activity_other']
+                'text': 'Прочее'
             }
         },
     ]
@@ -345,8 +314,7 @@ MAIN_MENU_BUTTONS = [
     SKILL_BUTTONS['statistic'],
     SKILL_BUTTONS['help'],
     SKILL_BUTTONS['what_you_can'],
-    SKILL_BUTTONS['dev'],
-    SKILL_BUTTONS['dev_info']
+    SKILL_BUTTONS['dev']
 ]
 
 HELP_BUTTONS = [
@@ -357,10 +325,10 @@ HELP_BUTTONS = [
 ]
 
 ACTIVITY_TYPES = [
-    SKILL_BUTTONS['activity_work_hide'],
-    SKILL_BUTTONS['activity_homework_hide'],
-    SKILL_BUTTONS['activity_hobby_hide'],
-    SKILL_BUTTONS['activity_sport_hide'],
+    SKILL_BUTTONS['activity_work'],
+    SKILL_BUTTONS['activity_homework'],
+    SKILL_BUTTONS['activity_hobby'],
+    SKILL_BUTTONS['activity_sport'],
     SKILL_BUTTONS['back']
 ]
 
@@ -374,7 +342,6 @@ END_ACTIVITY = [
 STATISTIC_BUTTONS = [
     SKILL_BUTTONS['get_entries'],
     SKILL_BUTTONS['get_daily_statistic'],
-    SKILL_BUTTONS['get_weekly_statistic'],
     SKILL_BUTTONS['back']
 ]
 

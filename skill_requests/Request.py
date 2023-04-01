@@ -12,6 +12,7 @@ class Request:
 
         self.init_session_state()
         self.init_command()
+        print(request['request'])
 
     def init_session_state(self) -> None:
         """ Инициализирует состояние сессии """
@@ -23,11 +24,10 @@ class Request:
 
     def init_command(self) -> None:
         """ Инициализирует команду пользователя """
-        if self.request['request']['type'] == 'ButtonPressed':
-            self.command = self.request['request']['payload'][0]
-            return
-
         nlu_tokens = self.request['request']['nlu']['tokens']
+        if self.session_is_new:
+            self.command = classify_command(nlu_tokens, METRICS['main_menu'])
+
         if self.session_state == 1:
             self.command = classify_command(nlu_tokens, METRICS['main_menu'])
 

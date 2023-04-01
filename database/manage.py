@@ -118,7 +118,7 @@ class DatabaseManager:
         result_set = self.execute(query, params)
         if not result_set or not result_set[0].rows:
             return None
-        print(result_set[0].rows[0])
+
         return result_set[0].rows[0]
 
     def delete_last_checkin(self, user_id, checkin_id):

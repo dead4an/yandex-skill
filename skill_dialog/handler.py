@@ -5,7 +5,6 @@ from datetime import datetime as dt
 import pytz
 import random
 from uuid import uuid4
-import os
 from .skill_buttons import (MAIN_MENU_BUTTONS, HELP_BUTTONS,
                             ACTIVITY_TYPES, END_ACTIVITY, STATISTIC_BUTTONS, ENTRIES_BUTTONS_START,
                             ENTRIES_BUTTONS, ENTRIES_BUTTONS_END, ENTRIES_ONLY_ONE_PAGE, STATISTIC_ACTIVITIES_CARD,
@@ -29,17 +28,21 @@ class DialogHandler:
         self.activities_list = None
         self.activity_name = None
         self.result = None
-        self.o_token = os.getenv('O_AUTH')
-
         self.check_user_is_new()
 
     def process(self):
         """ Обработка команды """
         if self.session_is_new:
-            self.new_session()
-            return
+            if self.command is None:
+                self.new_session()
 
-        if self.command in ('none', 'None', None):
+            elif self.command == 'activities':
+                self.activities()
+
+            elif self.command == 'statistic':
+                self.statistic()
+
+        elif self.command is None:
             self.command_not_found()
             return
 
@@ -65,6 +68,9 @@ class DialogHandler:
 
                 self.activities()
 
+            elif self.command == 'close_activity':
+                self.activities()
+
             elif self.command == 'statistic':
                 self.statistic()
 
@@ -75,8 +81,8 @@ class DialogHandler:
                 db = DatabaseManager()
                 start_time = self.get_time(return_timestamp=True)
                 end_time = start_time + pytz.HOUR
-                start_time = dt.strftime(start_time, '%d-%m-%Y %H:%M:%S')
-                end_time = dt.strftime(end_time, '%d-%m-%Y %H:%M:%S')
+                start_time = dt.strftime(start_time, '%Y-%m-%d %H:%M:%S')
+                end_time = dt.strftime(end_time, '%Y-%m-%d %H:%M:%S')
                 db.insert_activity(
                     id=str(uuid4()), user_id=self.__user_id, activity_id=1,
                     start_time=start_time, end_time=end_time, duration=3600, activity_type='activity_work',
@@ -89,37 +95,15 @@ class DialogHandler:
                 buttons = MAIN_MENU_BUTTONS
                 self.result = Response('', buttons, card, session_state=1, tts='Читер!')
 
-            elif self.command == 'dev_info':
-                text = (
-                    '1) Для Вашего удобства существует кнопка добавления записи об активности\n'
-                    '2) Активность "Прочее" ещё не готова (как и произвольный текст к активностям)\n'
-                    '3) Отключено определение часового пояса на время проверки. '
-                    'Используется часовой пояс по умолчанию (Europe/Moscow)\n'
-                    '4) В статистике существует пагинация (5 записей на страничку)\n'
-                    '5) В статистике не готова визуализация, но жмякнуть кнопку (возможно) стоит\n'
-                    '6) В планах добавить статистику за неделю (сейчас ограничено сутками)\n'
-                    '7) Надеемся, что информации в разделе помощь или что ты умеешь будет достаточно\n'
-                    'Приятного пользования!'
-                )
-                buttons = [
-                    {
-                        'title': 'Назад',
-                        'payload': 'back',
-                        'hide': False
-                    }
-                ]
-
-                self.result = Response(text, buttons, session_state=666, tts='')
-
-        # dev help
-        elif self.session_state == 666:
-            self.main_menu()
-
         # Раздел активностей
         elif self.session_state == 2:
             self.set_activity_name(self.command)
             if self.command == 'back':
                 self.main_menu()
+                return
+
+            if self.command == 'statistic':
+                self.statistic()
                 return
 
             checkin_id = str(uuid4())
@@ -174,8 +158,14 @@ class DialogHandler:
             elif self.command == 'get_daily_statistic':
                 self.get_daily_activities_card()
 
+            elif self.command == 'get_weekly_statistic':
+                self.main_menu()
+
             elif self.command in ['back', 'back_to_menu']:
                 self.main_menu()
+
+            elif self.command == 'activities':
+                self.activities()
 
         # Просмотр подробной статистики за день
         elif self.session_state >= 31:
@@ -302,7 +292,8 @@ class DialogHandler:
         self.result = Response('', buttons, card, session_state=2, tts=tts)
 
     def statistic(self):
-        today_date = dt.strftime(dt.date(self.get_time(return_timestamp=True)), '%d-%m-%Y')
+        today_date = dt.strftime(dt.date(self.get_time(return_timestamp=True)), '%Y-%m-%d')
+        print(today_date)
         db = DatabaseManager()
         if not db.check_activity(self.__user_id, today_date):
             text = 'Похоже, сегодня Вы ещё не закончили ни одной активности! '
@@ -329,7 +320,7 @@ class DialogHandler:
         for row in self.activities_list[start:start + 5]:
             activity_type = row[-2]
             self.set_activity_name(activity_type)
-            start_time = dt.strptime(row[3], '%d-%m-%Y %H:%M:%S')
+            start_time = dt.strptime(row[3], '%Y-%m-%d %H:%M:%S')
             start_time = dt.strftime(start_time, '%H:%M:%S')
             duration = self.get_time(timestamp=row[-3])
 
@@ -447,14 +438,13 @@ class DialogHandler:
     def get_activities(self):
         """ Возвращает все записи об активностях """
         db = DatabaseManager()
-        today_date = dt.strftime(dt.date(self.get_time(return_timestamp=True)), '%d-%m-%Y')
+        today_date = dt.strftime(dt.date(self.get_time(return_timestamp=True)), '%Y-%m-%d')
         self.activities_list = db.select_activities(self.__user_id, today_date)
 
     def close_activity(self, confirm_state_std=False):
         self.get_last_checkin()
         self.set_activity_name(self.last_checkin['activity_type'])
         db = DatabaseManager()
-        today_date = dt.strftime(dt.date(self.get_time(return_timestamp=True)), '%d-%m-%Y')
         last_activity_id = db.select_last_activity_id(self.__user_id)
 
         # UUID
@@ -467,9 +457,9 @@ class DialogHandler:
         current_time = self.get_time(return_timestamp=True)
         activity_duration = current_time - activity_start_time
         activity_duration = int(activity_duration.total_seconds())
-        start_time_write = dt.strftime(activity_start_time, '%d-%m-%Y %H:%M:%S')
+        start_time_write = dt.strftime(activity_start_time, '%Y-%m-%d %H:%M:%S')
         start_time_show = dt.strftime(activity_start_time, '%H:%M:%S')
-        current_time = dt.strftime(current_time, '%d-%m-%Y %H:%M:%S')
+        current_time = dt.strftime(current_time, '%Y-%m-%d %H:%M:%S')
         activity_duration_timestamp = self.get_time(timestamp=activity_duration)
 
         if activity_duration < 60:
@@ -544,17 +534,17 @@ class DialogHandler:
         # tz = pytz.timezone(self.timezone) ВЕРНУТЬ В РЕЛИЗЕ
         tz = pytz.timezone('Europe/Moscow')
         if time:
-            return dt.strptime(time, '%d-%m-%Y %H:%M:%S')
+            return dt.strptime(time, '%Y-%m-%d %H:%M:%S')
 
         if return_timestamp:
-            current_time = dt.strftime(dt.now(tz), '%d-%m-%Y %H:%M:%S')
-            return dt.strptime(current_time, '%d-%m-%Y %H:%M:%S')
+            current_time = dt.strftime(dt.now(tz), '%Y-%m-%d %H:%M:%S')
+            return dt.strptime(current_time, '%Y-%m-%d %H:%M:%S')
 
         if timestamp:
             datetime_from_timestamp = dt.fromtimestamp(float(timestamp))
             return dt.strftime(datetime_from_timestamp, '%H:%M:%S')
 
-        return dt.strftime(dt.now(tz), '%d-%m-%Y %H:%M:%S')
+        return dt.strftime(dt.now(tz), '%Y-%m-%d %H:%M:%S')
 
     def set_activity_name(self, activity_type):
         if activity_type == 'activity_work':

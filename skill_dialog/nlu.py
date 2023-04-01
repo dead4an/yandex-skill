@@ -1,14 +1,9 @@
 # Словарь для классификации запроса (cheap-NLP)
 # Работает с токенами из запроса
-import time
-
 command_classifier_dict = {
     # Главное меню
     'dev': {
-        'разработчик', 'разработчика', 'dev'
-    },
-    'dev_info': {
-        'проверяющих', 'dev_info'
+       'dev', 'проверяющий', 'длиною', 'в', 'час'
     },
     'help': {
         'навык', 'навыке', 'о', 'расскажи', 'гайд', 'научи', 'инструкция'
@@ -74,7 +69,7 @@ command_classifier_dict = {
     },
     'get_daily_statistic': {
         'день', 'сегодня', 'сегодняшняя', 'сегодняшнюю',
-        'весь', 'общая', 'get_daily_statistic'
+        'весь', 'общая', 'get_daily_statistic', 'статистика'
     },
     'get_weekly_statistic': {
         'неделя', 'неделю', 'вся', 'всю',
@@ -136,18 +131,18 @@ command_classifier_dict = {
 METRICS = {
     # Главное меню
     'main_menu': ['yes', 'no', 'help', 'activities',
-                  'statistic', 'what_you_can', 'dev',
-                  'dev_info'],
+                  'statistic', 'what_you_can', 'dev'],
 
     # Активности
     'activity_types': ['activity_work', 'activity_homework',
                        'activity_hobby', 'activity_sport',
-                       'activity_other', 'back'],
+                       'activity_other', 'back', 'statistic'],
     'close_activity': ['close_activity', 'continue_activity'],
 
     # Статистика
     'statistic': ['get_entries', 'get_daily_statistic',
-                  'get_weekly_statistic', 'back', 'back_to_menu'],
+                  'get_weekly_statistic', 'back', 'back_to_menu',
+                  'activities'],
     'entries_view': ['entries_continue', 'entries_previous',
                      'entries_stop', 'no', 'back_to_menu'],
 
@@ -166,6 +161,7 @@ def classify_command(tokens: list, metrics: list):
 
     counter = list(sorted(counter.items(), key=lambda x: x[1]))
     if counter[-1][1]:
+        print(counter[-1][1])
         return counter[-1][0]
 
-    return 'none'
+    return None
