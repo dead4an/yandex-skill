@@ -257,24 +257,27 @@ class DialogHandler:
     # Меню
     def main_menu(self, new_session=False):
         """ Главаное меню навыка """
-        timestamp = self.get_time(return_timestamp=True)
-        timestamp = time.mktime(timestamp.timetuple())
-        timestamp = self.get_time(timestamp=timestamp)
-
-        time_name = None
-        if '00:00:00' <= timestamp <= '05:59:59':
-            time_name = 'Доброе утро! '
-        elif '06:00:00' <= timestamp <= '11:59:59':
-            time_name = 'Добрый день! '
-
         text = random.choice(TEXTS['hello_std'])
         tts = 'Если хотите начать или закончить активность - скажите "Активность". ' \
               'sil <[250]> Хотите узнать свою статистику? Скажите "Статистика" и я покажу её вам. ' \
               'sil <[250]> Скажите "Помощь", если хотите узнать о навыке больше'
 
         if new_session:
-            text = 'Привет! ' + text
-            tts = 'Привет! ' + tts
+            timestamp = self.get_time(return_timestamp=True)
+            timestamp = time.mktime(timestamp.timetuple())
+            timestamp = self.get_time(timestamp=timestamp)
+
+            if '00:00:00' <= timestamp <= '05:59:59':
+                time_name = 'Доброй ночи! '
+            elif '06:00:00' <= timestamp <= '11:59:59':
+                time_name = 'Доброе утро! '
+            elif '12:00:00' <= timestamp <= '17:59:59':
+                time_name = 'Добрый день! '
+            else:
+                time_name = 'Добрый вечер! '
+
+            text = time_name + text
+            tts = time_name + tts
 
         buttons = MAIN_MENU_BUTTONS
         card = MAIN_MENU_CARD
