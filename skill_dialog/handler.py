@@ -1,3 +1,5 @@
+import time
+
 from skill_requests.Response import Response
 from database.manage import DatabaseManager
 from .skill_texts import TEXTS
@@ -255,6 +257,16 @@ class DialogHandler:
     # Меню
     def main_menu(self, new_session=False):
         """ Главаное меню навыка """
+        timestamp = self.get_time(return_timestamp=True)
+        timestamp = time.mktime(timestamp.timetuple())
+        timestamp = self.get_time(timestamp=timestamp)
+
+        time_name = None
+        if '00:00:00' <= timestamp <= '05:59:59':
+            time_name = 'Доброе утро! '
+        elif '06:00:00' <= timestamp <= '11:59:59':
+            time_name = 'Добрый день! '
+
         text = random.choice(TEXTS['hello_std'])
         tts = 'Если хотите начать или закончить активность - скажите "Активность". ' \
               'sil <[250]> Хотите узнать свою статистику? Скажите "Статистика" и я покажу её вам. ' \
@@ -273,7 +285,7 @@ class DialogHandler:
     # Что ты умеешь
     def about_possibilities(self):
         """ Краткая информация о навыке """
-        text = 'О чём именно вы хотите узнать? (P.S. BigImage реально Big)'
+        text = 'О чём именно вы хотите узнать?'
         tts = TEXTS['what_you_can']
         buttons = POSSIBILITIES_BUTTONS
         card = WHAT_YOU_CAN_CARD
