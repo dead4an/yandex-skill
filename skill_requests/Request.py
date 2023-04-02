@@ -2,6 +2,14 @@ from skill_dialog.nlu import classify_command, METRICS
 
 
 class Request:
+    def init_session_state(self) -> None:
+        """ Инициализирует состояние сессии """
+        if 'value' not in self.request['state']['session']:
+            self.session_state = 1
+            return
+
+        self.session_state = self.request['state']['session']['value']
+
     def __init__(self, request: dict) -> None:
         self.request = request
         self.user_id = request['session']['user']['user_id']
@@ -12,15 +20,6 @@ class Request:
 
         self.init_session_state()
         self.init_command()
-        print(request['request'])
-
-    def init_session_state(self) -> None:
-        """ Инициализирует состояние сессии """
-        if 'value' not in self.request['state']['session']:
-            self.session_state = 1
-            return
-
-        self.session_state = self.request['state']['session']['value']
 
     def init_command(self) -> None:
         """ Инициализирует команду пользователя """
@@ -33,7 +32,7 @@ class Request:
 
         elif self.session_state == 2:
             self.command = classify_command(nlu_tokens, METRICS['activity_types'])
-        
+
         elif self.session_state == 21 or self.session_state == 22:
             self.command = classify_command(nlu_tokens, METRICS['close_activity'])
 

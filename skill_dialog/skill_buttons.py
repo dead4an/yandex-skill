@@ -82,29 +82,29 @@ SKILL_BUTTONS = {
     },
     'get_entries': {
         'title': 'Подробная статистика',
-        'hide': False
+        'hide': True
     },
     'get_daily_statistic': {
-        'title': 'Сегодня',
-        'hide': False
+        'title': 'Статистика за сегодня',
+        'hide': True
     },
     'get_weekly_statistic': {
-        'title': 'Неделя',
+        'title': 'Статистика за неделю',
         'hide': True
     },
 
     # Statistic pagination
     'entries_continue': {
         'title': 'Следующая страница',
-        'hide': False
+        'hide': True
     },
     'entries_previous': {
         'title': 'Предыдущая страница',
-        'hide': False
+        'hide': True
     },
     'entries_stop': {
         'title': 'Главное меню',
-        'hide': False
+        'hide': True
     },
 
     # Other
@@ -267,23 +267,56 @@ ACTIVITIES_CARD = {
     ]
 }
 
+STATISTIC_CARD = {
+    'type': 'ItemsList',
+    'header': {
+        'text': 'Статистику за какой период вы хотели бы увидеть?'
+    },
+    'items': [
+        {
+            'image_id': '965417/05e3ab02e94af22568a3',
+            'title': 'Подробная статистика',
+            'description': 'Здесь вы можете посмотреть на записи о сегодняшних активностях',
+            'button': {
+                'text': 'Подробная статистика'
+            }
+        },
+        {
+            'image_id': '1533899/30d9e7b5109319d8063c',
+            'title': 'Статистика за сегодня',
+            'description': 'Здесь вы можете узнать общую статистику за сегодня',
+            'button': {
+                'text': 'Статистика за сегодня'
+            }
+        },
+        {
+            'image_id': '937455/d2b0b48b30926b65abdc',
+            'title': 'Ститистика за неделю',
+            'description': 'Здесь вы можете узнать общую статистику за последнюю неделю',
+            'button': {
+                'text': 'Статистика за неделю'
+            }
+        }
+    ]
+}
+
 ABOUT_SKILL_CARD = {
     'type': 'BigImage',
-    'image_id': '1533899/4b1c74d2a1681bdcf64f',
+    'image_id': '997614/7a322d2769472fb4517f',
     'title': 'О навыке',
     'description': (
         'Этот навык призван помочь Вам следить за тем, как Вы распределяете своё время. Если Вы активная '
         'личность, дорожащая каждой минутой и желающая оценить свои временные затраты - Контроль Времени '
-        'обязательно поможет Вам в этом деле. В разделе "Активности" Вы сможете делать отметки о начале и конце'
-        'ваших активностей, а раздел "Статистика" предоставит Вам краткую информацию о Ваших активностях в виде'
-        'текста и круговой диаграммы. Скажите, если хотите узнать подробнее о статистике и активностях. Или же '
+        'обязательно поможет Вам в этом деле. В разделе "Активности" Вы сможете делать отметки о начале и конце '
+        'ваших активностей, а раздел "Статистика" предоставит Вам краткую информацию о Ваших активностях в виде '
+        'записей. Скажите, если хотите узнать подробнее о статистике и активностях. Или же '
         'вернёмся в главное меню?'
     )
 }
 
 ABOUT_ACTIVITIES_CARD = {
     'type': 'BigImage',
-    'image_id': '997614/44b0c878d3ebeea64a34',
+    'image_id': '997614/0562f24a7fce15d3fa10',
     'title': 'Об активностях',
     'description': (
         'Активности представляют собой записи о Ваших действиях в течение дня. Существует несколько видов '
@@ -298,12 +331,13 @@ ABOUT_ACTIVITIES_CARD = {
 
 ABOUT_STATISTIC_CARD = {
     'type': 'BigImage',
-    'image_id': '1030494/a386ca38d555d4e1f6d8',
+    'image_id': '1521359/d13bed8584ac6a6103ee',
     'title': 'О статистике',
     'description': (
         'Наверняка вам захочется посмотреть на результаты ваших трудов, поэтому спешим вас обрадовать: Вы ' 
-        'можете узнать свою статистику за сегодняшний и предыдущие дни! Кроме того, что Вы сможете ' 
-        'посмотреть на неё в виде текстовых записей, мы добавим визуализацию в виде круговой диаграммы. ' 
+        'можете узнать свою статистику за сегодняшний и предыдущие дни! Если вы хотите узнать подробную '
+        'статистику за сегодняшний день, то скажите "Подробная статистика". Общая статистика за день и '
+        'за неделю доступна с помощью команд "Статистика за день" и "Статистика за неделю". ' 
         'Хотите узнать о навыке и активностях? Или же вернёмся в главное меню?'
     )
 }
@@ -321,6 +355,24 @@ HELP_BUTTONS = [
     SKILL_BUTTONS['about_skill'],
     SKILL_BUTTONS['about_activities'],
     SKILL_BUTTONS['about_statistic'],
+    SKILL_BUTTONS['back']
+]
+
+HELP_ABOUT_SKILL = [
+    SKILL_BUTTONS['about_activities'],
+    SKILL_BUTTONS['about_statistic'],
+    SKILL_BUTTONS['back']
+]
+
+HELP_ABOUT_ACTIVITIES = [
+    SKILL_BUTTONS['about_skill'],
+    SKILL_BUTTONS['about_statistic'],
+    SKILL_BUTTONS['back']
+]
+
+HELP_ABOUT_STATISTIC = [
+    SKILL_BUTTONS['about_skill'],
+    SKILL_BUTTONS['about_activities'],
     SKILL_BUTTONS['back']
 ]
 
@@ -342,27 +394,54 @@ END_ACTIVITY = [
 STATISTIC_BUTTONS = [
     SKILL_BUTTONS['get_entries'],
     SKILL_BUTTONS['get_daily_statistic'],
+    SKILL_BUTTONS['get_weekly_statistic'],
+    SKILL_BUTTONS['back']
+]
+
+STATISTIC_BUTTONS_ENTRIES = [
+    SKILL_BUTTONS['get_daily_statistic'],
+    SKILL_BUTTONS['get_weekly_statistic'],
+    SKILL_BUTTONS['back']
+]
+
+STATISTIC_BUTTONS_DAILY = [
+    SKILL_BUTTONS['get_entries'],
+    SKILL_BUTTONS['get_weekly_statistic'],
+    SKILL_BUTTONS['back']
+]
+
+STATISTIC_BUTTONS_WEEKLY = [
+    SKILL_BUTTONS['get_entries'],
+    SKILL_BUTTONS['get_daily_statistic'],
     SKILL_BUTTONS['back']
 ]
 
 ENTRIES_BUTTONS_START = [
     SKILL_BUTTONS['entries_continue'],
-    SKILL_BUTTONS['entries_stop']
+    SKILL_BUTTONS['entries_stop'],
+    SKILL_BUTTONS['get_daily_statistic'],
+    SKILL_BUTTONS['get_weekly_statistic']
 ]
 
 ENTRIES_BUTTONS = [
     SKILL_BUTTONS['entries_continue'],
     SKILL_BUTTONS['entries_previous'],
-    SKILL_BUTTONS['entries_stop']
+    SKILL_BUTTONS['entries_stop'],
+    SKILL_BUTTONS['get_daily_statistic'],
+    SKILL_BUTTONS['get_weekly_statistic']
 ]
 
 ENTRIES_BUTTONS_END = [
     SKILL_BUTTONS['entries_previous'],
-    SKILL_BUTTONS['entries_stop']
+    SKILL_BUTTONS['entries_stop'],
+    SKILL_BUTTONS['get_daily_statistic'],
+    SKILL_BUTTONS['get_weekly_statistic']
 ]
 
 ENTRIES_ONLY_ONE_PAGE = [
-    SKILL_BUTTONS['main_menu']
+    SKILL_BUTTONS['get_daily_statistic'],
+    SKILL_BUTTONS['get_weekly_statistic'],
+    SKILL_BUTTONS['back']
 ]
 
 POSSIBILITIES_BUTTONS = [

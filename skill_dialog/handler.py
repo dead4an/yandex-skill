@@ -12,7 +12,8 @@ from .skill_buttons import (MAIN_MENU_BUTTONS, HELP_BUTTONS,
                             ENTRIES_BUTTONS, ENTRIES_BUTTONS_END, ENTRIES_ONLY_ONE_PAGE, STATISTIC_ACTIVITIES_CARD,
                             WHAT_YOU_CAN_CARD, POSSIBILITIES_BUTTONS, MAIN_MENU_CARD, HELLO_NEW_BUTTONS,
                             ACTIVITIES_CARD, ABOUT_SKILL_CARD, ABOUT_ACTIVITIES_CARD, ABOUT_STATISTIC_CARD,
-                            DAILY_STATISTIC_CARD)
+                            DAILY_STATISTIC_CARD, STATISTIC_CARD, STATISTIC_BUTTONS_DAILY, STATISTIC_BUTTONS_WEEKLY,
+                            STATISTIC_BUTTONS_ENTRIES, HELP_ABOUT_STATISTIC, HELP_ABOUT_SKILL, HELP_ABOUT_ACTIVITIES)
 
 
 class DialogHandler:
@@ -111,7 +112,6 @@ class DialogHandler:
             checkin_id = str(uuid4())
 
             self.add_checkin(checkin_id, 'start', self.command)
-            print(self.command)
             text = (
                 f'Принято! Отслеживаю активность "{self.activity_name}". '
                 'Когда Вы закончите, просто сообщите об этом. '
@@ -149,15 +149,10 @@ class DialogHandler:
         # Просмотр статистики
         elif self.session_state == 3:
             if self.command == 'get_entries':
-                text = ''
-                activities_card, last_page = self.get_activities_card(0)
-                if last_page:
-                    self.result = Response('', ENTRIES_ONLY_ONE_PAGE, activities_card, session_state=3)
-                    return
-
-                self.result = Response(text, ENTRIES_BUTTONS_START, activities_card, session_state=31)
+                self.daily_statistic()
 
             elif self.command == 'get_daily_statistic':
+                print('works')
                 self.get_daily_activities_card()
 
             elif self.command == 'get_weekly_statistic':
@@ -197,6 +192,12 @@ class DialogHandler:
                                        session_state=self.session_state - 1)
 
             elif self.command in ['entries_stop', 'no', 'back_to_menu']:
+                self.main_menu()
+
+            elif self.command == 'get_daily_statistic':
+                self.get_daily_activities_card()
+
+            elif self.command == 'get_weekly_statistic':
                 self.main_menu()
 
         # Что ты умеешь
@@ -319,9 +320,24 @@ class DialogHandler:
             self.result = Response('', buttons, card, session_state=1, tts=tts)
             return
 
-        text = 'Хотите увидеть визуализацию или посмотреть записи об Активностях?'
+        tts = (
+            'Вы можете посмотреть подробную статистику за сегодня, '
+            'общую статистику за сегодня, а также статистику за неделю. '
+            'Что именно вы хотите сделать?'
+        )
+        card = STATISTIC_CARD
         buttons = STATISTIC_BUTTONS
-        self.result = Response(text, buttons, session_state=3)
+        self.result = Response('', buttons, card, session_state=3, tts=tts)
+
+    def daily_statistic(self):
+        text = ''
+        activities_card, last_page = self.get_activities_card(0)
+        buttons = STATISTIC_BUTTONS_ENTRIES
+        if last_page:
+            self.result = Response('', buttons, activities_card, session_state=3)
+            return
+
+        self.result = Response(text, ENTRIES_BUTTONS_START, activities_card, session_state=31)
 
     def get_activities_card(self, start):
         """ Возвращает карточку со списком последних активностей """
@@ -356,7 +372,7 @@ class DialogHandler:
                 title = 'Спорт'
                 desctiption = f'Начало: {start_time} | Продолжительность {duration}'
             elif activity_type == 'activity_other':
-                image_id = '213044/d458652c075b18128692'
+                image_id = '1030494/edca956f6dd3f17aa057'
                 title = 'Прочее'
                 desctiption = f'Начало: {start_time} | Продолжительность {duration}'
             else:
@@ -427,10 +443,10 @@ class DialogHandler:
                 'description': f'Общее время занятия разными делами: {other_duration}'
             })
 
-        buttons = ENTRIES_ONLY_ONE_PAGE
+        buttons = STATISTIC_BUTTONS_DAILY
         daily_card = DAILY_STATISTIC_CARD
         daily_card.update({'items': activities_cards})
-        self.result = Response('', buttons, daily_card, session_state=7)
+        self.result = Response('', buttons, daily_card, session_state=3)
 
     def add_checkin(self, checkin_id, checkin_type, activity_type):
         """ Добавление отметки о начале | конце активности """
@@ -495,6 +511,9 @@ class DialogHandler:
             self.result = Response(text, buttons, session_state=22)
             return
 
+        if activity_duration > 43200:
+            activity_duration = 43200
+
         self.add_activity(general_activity_id, last_activity_id + 1, start_time_write,
                           current_time, activity_duration, self.last_checkin['activity_type'], 'text')
         self.add_checkin(checkin_id, 'stop', self.last_checkin['activity_type'])
@@ -512,7 +531,7 @@ class DialogHandler:
     def help(self):
         """ Помощь пользователю """
         tts = TEXTS['help']
-        text = 'О чём именно вы хотите узнать? (P.S. BigImage реально Big)'
+        text = 'О чём именно вы хотите узнать?'
         buttons = POSSIBILITIES_BUTTONS
         card = WHAT_YOU_CAN_CARD
         card['header'].update({'text': text})
@@ -524,32 +543,32 @@ class DialogHandler:
             'личность, дорожащая каждой минутой и желающая оценить свои временн+ые затраты - Контроль Времени '
             'обязательно поможет Вам в этом деле. В разделе "Активности" Вы сможете делать отметки о начале и конце '
             'ваших активностей, а раздел "Статистика" предоставит Вам краткую информацию о Ваших активностях в виде '
-            'текста и круговой диаграммы. Скажите, если хотите узнать подробнее о статистике и активностях. Или же '
+            'записей. Скажите, если хотите узнать подробнее о статистике и активностях. Или же '
             'вернёмся в главное меню?'
         )
-        buttons = HELP_BUTTONS
+        buttons = HELP_ABOUT_SKILL
         card = ABOUT_SKILL_CARD
         self.result = Response('', buttons, card, session_state=6, tts=tts)
 
     def about_activities(self):
         text = TEXTS['about_activities']
-        buttons = HELP_BUTTONS
+        buttons = HELP_ABOUT_ACTIVITIES
         card = ABOUT_ACTIVITIES_CARD
         self.result = Response('', buttons, card, session_state=6, tts=text)
 
     def about_statistic(self):
         text = TEXTS['about_statistic']
-        buttons = HELP_BUTTONS
+        buttons = HELP_ABOUT_STATISTIC
         card = ABOUT_STATISTIC_CARD
         self.result = Response('', buttons, card, session_state=6, tts=text)
 
     @staticmethod
-    def get_time(time=None, return_timestamp=False, timestamp=None):
+    def get_time(str_time=None, return_timestamp=False, timestamp=None):
         """ Возвращает текущее время, либо преобразует str в timestamp """
         # tz = pytz.timezone(self.timezone) ВЕРНУТЬ В РЕЛИЗЕ
         tz = pytz.timezone('Europe/Moscow')
-        if time:
-            return dt.strptime(time, '%Y-%m-%d %H:%M:%S')
+        if str_time:
+            return dt.strptime(str_time, '%Y-%m-%d %H:%M:%S')
 
         if return_timestamp:
             current_time = dt.strftime(dt.now(tz), '%Y-%m-%d %H:%M:%S')

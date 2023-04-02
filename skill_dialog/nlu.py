@@ -69,7 +69,7 @@ command_classifier_dict = {
     },
     'get_daily_statistic': {
         'день', 'сегодня', 'сегодняшняя', 'сегодняшнюю',
-        'весь', 'общая', 'get_daily_statistic', 'статистика'
+        'весь', 'общая', 'get_daily_statistic'
     },
     'get_weekly_statistic': {
         'неделя', 'неделю', 'вся', 'всю',
@@ -121,10 +121,11 @@ command_classifier_dict = {
     # Назад | в главное меню
     'back': {
         'вернуться', 'назад', 'отменить', 'отмени', 'верни',
-        'отмена', 'предыдущий', 'back'
+        'отмена', 'предыдущий', 'back', 'главное', 'меню'
     },
     'back_to_menu': {
-        'главное', 'меню', 'в', 'back_to_menu'
+        'главное', 'меню', 'в', 'back_to_menu', 'вернуться',
+        'назад', 'отменить'
     }
 }
 
@@ -144,11 +145,12 @@ METRICS = {
                   'get_weekly_statistic', 'back', 'back_to_menu',
                   'activities'],
     'entries_view': ['entries_continue', 'entries_previous',
-                     'entries_stop', 'no', 'back_to_menu'],
+                     'entries_stop', 'no', 'back_to_menu',
+                     'get_daily_statistic'],
 
     # Помощь
-    'help': ['about_skill', 'about_activities',
-             'about_statistic', 'back', 'back_to_menu']
+    'help': ['about_skill', 'about_activities', 'about_statistic',
+             'back', 'back_to_menu']
 }
 
 
@@ -161,7 +163,6 @@ def classify_command(tokens: list, metrics: list):
 
     counter = list(sorted(counter.items(), key=lambda x: x[1]))
     if counter[-1][1]:
-        print(counter[-1][1])
         return counter[-1][0]
 
     return None
