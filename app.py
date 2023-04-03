@@ -1,11 +1,9 @@
 from skill_requests.Request import Request
 from skill_dialog.handler import DialogHandler
-import time
 
 
 def main(event, context):
     """ Точка входа в приложение """
-    start = time.time()
     # Обработка запроса
     try:
         req = Request(event)
@@ -20,7 +18,6 @@ def main(event, context):
             session_is_new, timezone
         )
         dialog.process()
-        print('Time: ', time.time() - start)
         return dialog.respond()
 
     except Exception:

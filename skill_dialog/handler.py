@@ -1,13 +1,11 @@
 import datetime
 import time
-
 from skill_requests.Response import Response
 from database.manage import DatabaseManager
 from .skill_texts import TEXTS
 from datetime import datetime as dt
 import pytz
 import random
-import pandas as pd
 from uuid import uuid4
 from .skill_buttons import (MAIN_MENU_BUTTONS,
                             ACTIVITY_TYPES, END_ACTIVITY, STATISTIC_BUTTONS, ENTRIES_BUTTONS_START,
@@ -424,10 +422,11 @@ class DialogHandler:
 
     def get_daily_activities_card(self, weekly=None):
         """ Возвращает карточку с общей статистикой за день"""
+        from pandas import DataFrame
         if weekly:
             self.get_activities(weekly=True)
-            df = pd.DataFrame(self.activities_list, columns=['uuid', 'user_id', 'activity_id', 'start_time', 'end_time',
-                                                             'duration', 'activity_type', 'text'])
+            df = DataFrame(self.activities_list, columns=['uuid', 'user_id', 'activity_id', 'start_time', 'end_time',
+                                                          'duration', 'activity_type', 'text'])
             df['start_time'] = df['start_time'].str[:10]
             dates = df['start_time'].unique()
             days = []
@@ -494,9 +493,10 @@ class DialogHandler:
                                    'или вернуться в главное меню?')
 
     def count_activities_duration(self, date=None):
+        from pandas import DataFrame
         if date:
-            df = pd.DataFrame(self.activities_list, columns=['uuid', 'user_id', 'activity_id', 'start_time', 'end_time',
-                                                             'duration', 'activity_type', 'text'])
+            df = DataFrame(self.activities_list, columns=['uuid', 'user_id', 'activity_id', 'start_time', 'end_time',
+                                                          'duration', 'activity_type', 'text'])
             df['start_time'] = df['start_time'].str[:10]
             work_duration = df.query(f"start_time=='{date}' & activity_type=='activity_work'")['duration'].sum()
             homework_duration = df.query(f"start_time=='{date}' & activity_type=='activity_homework'")['duration'].sum()
@@ -504,11 +504,9 @@ class DialogHandler:
             sport_duration = df.query(f"start_time=='{date}' & activity_type=='activity_sport'")['duration'].sum()
             other_duration = df.query(f"start_time=='{date}' & activity_type=='activity_other'")['duration'].sum()
 
-            print(work_duration)
-
         else:
-            df = pd.DataFrame(self.activities_list, columns=['uuid', 'user_id', 'activity_id', 'start_time', 'end_time',
-                                                             'duration', 'activity_type', 'text'])
+            df = DataFrame(self.activities_list, columns=['uuid', 'user_id', 'activity_id', 'start_time', 'end_time',
+                                                          'duration', 'activity_type', 'text'])
 
             work_duration = df.query("activity_type=='activity_work'")['duration'].sum()
             homework_duration = df.query("activity_type=='activity_homework'")['duration'].sum()
