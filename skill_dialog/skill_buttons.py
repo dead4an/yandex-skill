@@ -1,9 +1,5 @@
 # Кнопки навыка
 SKILL_BUTTONS = {
-    'dev': {
-        'title': 'DEV|Проверяющий: добавить активность длиною в час',
-        'hide': False
-    },
     'main_menu': {
         'title': 'Главное меню',
         'hide': True
@@ -132,7 +128,7 @@ STATISTIC_ACTIVITIES_CARD = {
 DAILY_STATISTIC_CARD = {
     'type': 'ItemsList',
     'header': {
-        'text': 'Ваша статистика за сегодня'
+        'text': 'Ваша статистика за день'
     },
     'items': [
 
@@ -300,6 +296,13 @@ STATISTIC_CARD = {
     ]
 }
 
+WEEKLY_STATISTIC_CARD = {
+    'type': 'ItemsList',
+    'header': {
+        'text': 'Статистику за какой день Вы хотели бы посмотреть?'
+    }
+}
+
 ABOUT_SKILL_CARD = {
     'type': 'BigImage',
     'image_id': '997614/7a322d2769472fb4517f',
@@ -347,8 +350,7 @@ MAIN_MENU_BUTTONS = [
     SKILL_BUTTONS['activities'],
     SKILL_BUTTONS['statistic'],
     SKILL_BUTTONS['help'],
-    SKILL_BUTTONS['what_you_can'],
-    SKILL_BUTTONS['dev']
+    SKILL_BUTTONS['what_you_can']
 ]
 
 HELP_BUTTONS = [
@@ -411,9 +413,14 @@ STATISTIC_BUTTONS_DAILY = [
 ]
 
 STATISTIC_BUTTONS_WEEKLY = [
+    SKILL_BUTTONS['back'],
+    SKILL_BUTTONS['main_menu']
+]
+
+WEEKLY_VIEW_BUTTONS = [
     SKILL_BUTTONS['get_entries'],
     SKILL_BUTTONS['get_daily_statistic'],
-    SKILL_BUTTONS['back']
+    SKILL_BUTTONS['main_menu']
 ]
 
 ENTRIES_BUTTONS_START = [

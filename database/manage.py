@@ -46,6 +46,16 @@ FROM activities WHERE user_id=$user_id
 AND start_time >= $today_date 
 ORDER BY start_time DESC;"""
 
+SELECT_ACTIVITIES_SLICE = """
+DECLARE $user_id AS Utf8;
+DECLARE $start_slice AS Utf8;
+DECLARE $end_slice AS Utf8;
+SELECT id, user_id, activity_id, start_time, end_time, duration, activity_type, text  
+FROM activities WHERE user_id=$user_id 
+AND start_time >= $start_slice
+AND start_time <= $end_slice
+ORDER BY start_time DESC;"""
+
 INSERT_USER = """
 DECLARE $id AS Utf8;
 UPSERT INTO users (id) VALUES ($id);"""
@@ -155,6 +165,24 @@ class DatabaseManager:
 
         return activities_list
 
+    def select_activities_slice(self, user_id, start_slice, end_slice):
+        """ Возвращает активности пользователя """
+        query = SELECT_ACTIVITIES_SLICE
+        params = {
+            '$user_id': user_id, '$start_slice': start_slice,
+            '$end_slice': end_slice
+        }
+
+        result_set = self.execute(query, params)
+        if not result_set or not result_set[0].rows:
+            return None
+
+        activities_list = []
+        for row in result_set[0].rows:
+            activities_list.append(list(row.values()))
+
+        return activities_list
+
     def select_last_activity_id(self, user_id):
         """ Возвращает id последней активности """
         query = SELECT_LAST_ACTIVITY_ID
@@ -175,7 +203,6 @@ class DatabaseManager:
 
         print(result_set[0].rows)
         if not result_set or not result_set[0].rows:
-            print('none')
             return None
 
         return True

@@ -1,3 +1,4 @@
+import datetime
 import time
 
 from skill_requests.Response import Response
@@ -6,14 +7,16 @@ from .skill_texts import TEXTS
 from datetime import datetime as dt
 import pytz
 import random
+import pandas as pd
 from uuid import uuid4
-from .skill_buttons import (MAIN_MENU_BUTTONS, HELP_BUTTONS,
+from .skill_buttons import (MAIN_MENU_BUTTONS,
                             ACTIVITY_TYPES, END_ACTIVITY, STATISTIC_BUTTONS, ENTRIES_BUTTONS_START,
-                            ENTRIES_BUTTONS, ENTRIES_BUTTONS_END, ENTRIES_ONLY_ONE_PAGE, STATISTIC_ACTIVITIES_CARD,
+                            ENTRIES_BUTTONS, ENTRIES_BUTTONS_END, STATISTIC_ACTIVITIES_CARD,
                             WHAT_YOU_CAN_CARD, POSSIBILITIES_BUTTONS, MAIN_MENU_CARD, HELLO_NEW_BUTTONS,
                             ACTIVITIES_CARD, ABOUT_SKILL_CARD, ABOUT_ACTIVITIES_CARD, ABOUT_STATISTIC_CARD,
                             DAILY_STATISTIC_CARD, STATISTIC_CARD, STATISTIC_BUTTONS_DAILY, STATISTIC_BUTTONS_WEEKLY,
-                            STATISTIC_BUTTONS_ENTRIES, HELP_ABOUT_STATISTIC, HELP_ABOUT_SKILL, HELP_ABOUT_ACTIVITIES)
+                            STATISTIC_BUTTONS_ENTRIES, HELP_ABOUT_STATISTIC, HELP_ABOUT_SKILL, HELP_ABOUT_ACTIVITIES,
+                            WEEKLY_STATISTIC_CARD, WEEKLY_VIEW_BUTTONS)
 
 
 class DialogHandler:
@@ -51,13 +54,8 @@ class DialogHandler:
 
         # Главное меню
         if self.session_state == 1:
-            if self.command == 'yes':
-                self.main_menu()
-                return
-
-            if self.command == 'no':
-                text = 'Удачи!'
-                self.result = Response(text=text, end_session=True)
+            if self.command == 'quit':
+                self.result = Response('Удачи!', end_session=True, tts='Удачки!')
                 return
 
             if self.command == 'help':
@@ -79,24 +77,6 @@ class DialogHandler:
 
             elif self.command == 'what_you_can':
                 self.about_possibilities()
-
-            elif self.command == 'dev':
-                db = DatabaseManager()
-                start_time = self.get_time(return_timestamp=True)
-                end_time = start_time + pytz.HOUR
-                start_time = dt.strftime(start_time, '%Y-%m-%d %H:%M:%S')
-                end_time = dt.strftime(end_time, '%Y-%m-%d %H:%M:%S')
-                db.insert_activity(
-                    id=str(uuid4()), user_id=self.__user_id, activity_id=1,
-                    start_time=start_time, end_time=end_time, duration=3600, activity_type='activity_work',
-                    text='dev'
-                )
-
-                text = 'DEV: Активность добавлена'
-                card = MAIN_MENU_CARD
-                card['header'].update({'text': text})
-                buttons = MAIN_MENU_BUTTONS
-                self.result = Response('', buttons, card, session_state=1, tts='Читер!')
 
         # Раздел активностей
         elif self.session_state == 2:
@@ -152,11 +132,10 @@ class DialogHandler:
                 self.daily_statistic()
 
             elif self.command == 'get_daily_statistic':
-                print('works')
                 self.get_daily_activities_card()
 
             elif self.command == 'get_weekly_statistic':
-                self.main_menu()
+                self.get_daily_activities_card(weekly=True)
 
             elif self.command in ['back', 'back_to_menu']:
                 self.main_menu()
@@ -198,6 +177,7 @@ class DialogHandler:
                 self.get_daily_activities_card()
 
             elif self.command == 'get_weekly_statistic':
+                self.get_activities(weekly=True)
                 self.main_menu()
 
         # Что ты умеешь
@@ -224,7 +204,58 @@ class DialogHandler:
 
         # Статистика за день
         elif self.session_state == 7:
-            self.main_menu()
+            today_date = dt.strftime(dt.date(self.get_time(return_timestamp=True)), '%Y-%m-%d')
+            today_date = dt.strptime(f'{today_date} 00:00:00', '%Y-%m-%d %H:%M:%S')
+            delta_day = datetime.timedelta(hours=24)
+            activities_cards = []
+
+            if self.command == 'one_ago':
+                self.get_activities(weekly=True)
+                date = dt.strftime(today_date - delta_day, '%Y-%m-%d')
+                activities_cards = self.count_activities_duration(date)
+
+            elif self.command == 'two_ago':
+                self.get_activities(weekly=True)
+                date = dt.strftime(today_date - delta_day * 2, '%Y-%m-%d')
+                activities_cards = self.count_activities_duration(date)
+
+            elif self.command == 'three_ago':
+                self.get_activities(weekly=True)
+                date = dt.strftime(today_date - delta_day * 3, '%Y-%m-%d')
+                activities_cards = self.count_activities_duration(date)
+
+            elif self.command == 'four_ago':
+                self.get_activities(weekly=True)
+                date = dt.strftime(today_date - delta_day * 4, '%Y-%m-%d')
+                activities_cards = self.count_activities_duration(date)
+
+            elif self.command == 'five_ago':
+                self.get_activities(weekly=True)
+                date = dt.strftime(today_date - delta_day * 5, '%Y-%m-%d')
+                activities_cards = self.count_activities_duration(date)
+
+            elif self.command == 'get_entries':
+                self.daily_statistic()
+                return
+
+            elif self.command == 'get_daily_statistic':
+                self.get_daily_activities_card()
+                return
+
+            elif self.command == 'back':
+                self.get_daily_activities_card(weekly=True)
+                return
+
+            elif self.command == 'back_to_menu':
+                self.main_menu()
+                return
+
+            card = DAILY_STATISTIC_CARD
+            card.update({'items': activities_cards})
+            self.result = Response('', STATISTIC_BUTTONS_WEEKLY, card, session_state=7,
+                                   tts='Вот ваша статистика за этот день. Скажите "назад", '
+                                       'чтобы посмотреть статистику за другие дни. Или вернёмся '
+                                       'в главное меню?')
 
     def command_not_found(self):
         """ Команда не найдена """
@@ -309,7 +340,6 @@ class DialogHandler:
 
     def statistic(self):
         today_date = dt.strftime(dt.date(self.get_time(return_timestamp=True)), '%Y-%m-%d')
-        print(today_date)
         db = DatabaseManager()
         if not db.check_activity(self.__user_id, today_date):
             text = 'Похоже, сегодня Вы ещё не закончили ни одной активности! '
@@ -392,61 +422,144 @@ class DialogHandler:
         activities_card.update({'items': activity_items})
         return activities_card, last_page
 
-    def get_daily_activities_card(self):
+    def get_daily_activities_card(self, weekly=None):
         """ Возвращает карточку с общей статистикой за день"""
+        if weekly:
+            self.get_activities(weekly=True)
+            df = pd.DataFrame(self.activities_list, columns=['uuid', 'user_id', 'activity_id', 'start_time', 'end_time',
+                                                             'duration', 'activity_type', 'text'])
+            df['start_time'] = df['start_time'].str[:10]
+            dates = df['start_time'].unique()
+            days = []
+            day_counter = 0
+            for date in dates:
+                year = date[:4]
+                month = date[5:7]
+                day = date[8:]
+
+                if day_counter == 0:
+                    day_counter += 1
+                    continue
+
+                elif day_counter == 1:
+                    day_name = 'Вчера'
+                    image_id = '1030494/13ccbfe97e126e8743e8'
+                elif day_counter == 2:
+                    day_name = 'Позавчера'
+                    image_id = '1652229/89f1a6409cb0bf67414f'
+                elif day_counter == 3:
+                    day_name = 'Три дня назад'
+                    image_id = '1652229/2b1bcd8e99f5663264f3'
+                elif day_counter == 4:
+                    day_name = 'Четыре дня назад'
+                    image_id = '1533899/60ae1bf8cc727f2d59ce'
+                else:
+                    day_name = 'Пять дней назад'
+                    image_id = '1652229/1be311bfe2beccafe547'
+
+                days.append({
+                    'image_id': image_id,
+                    'title': day_name,
+                    'description': f'{day}-{month}-{year}',
+                    'button': {
+                        'title': day_name
+                    }
+                })
+
+                day_counter += 1
+
+            if len(days) == 0:
+                card = STATISTIC_CARD
+                card['header'].update({'text': 'Похоже, у Вас нет статистики за предыдущие дни'})
+                buttons = STATISTIC_BUTTONS
+                self.result = Response('', buttons, card, session_state=3,
+                                       tts='Похоже, у вас нет статистики за предыдущие дни. '
+                                           'Хотите узнать подробную или общую статистику за сегодня? '
+                                           'Или же вернёмся в главное меню?')
+                return
+
+            card = WEEKLY_STATISTIC_CARD
+            card.update({'items': days})
+            self.result = Response('', WEEKLY_VIEW_BUTTONS, card, session_state=7,
+                                   tts='Статистику за какой день Вы хотели бы увидеть?')
+            return
+
         self.get_activities()
-        activities_duration = {
-            'activity_work': 0, 'activity_homework': 0, 'activity_hobby': 0,
-            'activity_sport': 0, 'activity_other': 0
-        }
+        activities_cards = self.count_activities_duration()
+        buttons = STATISTIC_BUTTONS_DAILY
+        daily_card = DAILY_STATISTIC_CARD
+        daily_card.update({'items': activities_cards})
+        self.result = Response('', buttons, daily_card, session_state=3,
+                               tts='Вот ваша статистика за день. Хотите узнать подробную статистику '
+                                   'или вернуться в главное меню?')
 
-        for row in self.activities_list:
-            activitity_type = row[-2]
-            activity_duration = row[-3]
-            activities_duration[activitity_type] += activity_duration
+    def count_activities_duration(self, date=None):
+        if date:
+            df = pd.DataFrame(self.activities_list, columns=['uuid', 'user_id', 'activity_id', 'start_time', 'end_time',
+                                                             'duration', 'activity_type', 'text'])
+            df['start_time'] = df['start_time'].str[:10]
+            work_duration = df.query(f"start_time=='{date}' & activity_type=='activity_work'")['duration'].sum()
+            homework_duration = df.query(f"start_time=='{date}' & activity_type=='activity_homework'")['duration'].sum()
+            hobby_duration = df.query(f"start_time=='{date}' & activity_type=='activity_hobby'")['duration'].sum()
+            sport_duration = df.query(f"start_time=='{date}' & activity_type=='activity_sport'")['duration'].sum()
+            other_duration = df.query(f"start_time=='{date}' & activity_type=='activity_other'")['duration'].sum()
 
-        work_duration = self.get_time(timestamp=activities_duration['activity_work'])
-        homework_duration = self.get_time(timestamp=activities_duration['activity_homework'])
-        hobby_duration = self.get_time(timestamp=activities_duration['activity_hobby'])
-        sport_duration = self.get_time(timestamp=activities_duration['activity_sport'])
-        other_duration = self.get_time(timestamp=activities_duration['activity_other'])
+            print(work_duration)
+
+        else:
+            df = pd.DataFrame(self.activities_list, columns=['uuid', 'user_id', 'activity_id', 'start_time', 'end_time',
+                                                             'duration', 'activity_type', 'text'])
+
+            work_duration = df.query("activity_type=='activity_work'")['duration'].sum()
+            homework_duration = df.query("activity_type=='activity_homework'")['duration'].sum()
+            hobby_duration = df.query("activity_type=='activity_hobby'")['duration'].sum()
+            sport_duration = df.query(f"activity_type=='activity_sport'")['duration'].sum()
+            other_duration = df.query(f"activity_type=='activity_other'")['duration'].sum()
+
+        if work_duration:
+            work_duration = self.get_time(timestamp=work_duration)
+        if homework_duration:
+            homework_duration = self.get_time(timestamp=homework_duration)
+        if hobby_duration:
+            hobby_duration = self.get_time(timestamp=hobby_duration)
+        if sport_duration:
+            sport_duration = self.get_time(timestamp=sport_duration)
+        if other_duration:
+            other_duration = self.get_time(timestamp=other_duration)
 
         activities_cards = []
-        if activities_duration['activity_work']:
+        if work_duration:
             activities_cards.append({
                 'image_id': '213044/39799b3319bd0fb5135b',
                 'title': 'Работа',
                 'description': f'Общее время занятия работой: {work_duration}'
             })
-        if activities_duration['activity_homework']:
+        if homework_duration:
             activities_cards.append({
                 'image_id': '213044/1ad7f49599385016222d',
                 'title': 'Домашние Дела',
                 'description': f'Общее время занятия домашними делами: {homework_duration}'
             })
-        if activities_duration['activity_hobby']:
+        if hobby_duration:
             activities_cards.append({
                 'image_id': '213044/b85af62b5e29b538daca',
                 'title': 'Хобби',
                 'description': f'Общее время занятия хобби: {hobby_duration}'
             })
-        if activities_duration['activity_sport']:
+        if sport_duration:
             activities_cards.append({
                 'image_id': '213044/d458652c075b18128692',
                 'title': 'Спорт',
                 'description': f'Общее время занятия спортом: {sport_duration}'
             })
-        if activities_duration['activity_other']:
+        if other_duration:
             activities_cards.append({
                 'image_id': '1030494/edca956f6dd3f17aa057',
                 'title': 'Прочее',
                 'description': f'Общее время занятия разными делами: {other_duration}'
             })
 
-        buttons = STATISTIC_BUTTONS_DAILY
-        daily_card = DAILY_STATISTIC_CARD
-        daily_card.update({'items': activities_cards})
-        self.result = Response('', buttons, daily_card, session_state=3)
+        return activities_cards
 
     def add_checkin(self, checkin_id, checkin_type, activity_type):
         """ Добавление отметки о начале | конце активности """
@@ -466,9 +579,18 @@ class DialogHandler:
         db.insert_activity(general_id, self.__user_id, activity_id, start_time, end_time,
                            duration, activity_type, text)
 
-    def get_activities(self):
+    def get_activities(self, weekly=None):
         """ Возвращает все записи об активностях """
         db = DatabaseManager()
+
+        if weekly:
+            today = self.get_time(return_timestamp=True)
+            day_time_delta = datetime.timedelta(hours=24)
+            latest_date = today - day_time_delta * 5
+            latest_date = dt.strftime(latest_date, '%Y-%m-%d 00:00:00')
+            self.activities_list = db.select_activities(self.__user_id, latest_date)
+            return
+
         today_date = dt.strftime(dt.date(self.get_time(return_timestamp=True)), '%Y-%m-%d')
         self.activities_list = db.select_activities(self.__user_id, today_date)
 
@@ -562,11 +684,9 @@ class DialogHandler:
         card = ABOUT_STATISTIC_CARD
         self.result = Response('', buttons, card, session_state=6, tts=text)
 
-    @staticmethod
-    def get_time(str_time=None, return_timestamp=False, timestamp=None):
+    def get_time(self, str_time=None, return_timestamp=False, timestamp=None):
         """ Возвращает текущее время, либо преобразует str в timestamp """
-        # tz = pytz.timezone(self.timezone) ВЕРНУТЬ В РЕЛИЗЕ
-        tz = pytz.timezone('Europe/Moscow')
+        tz = pytz.timezone(self.timezone)
         if str_time:
             return dt.strptime(str_time, '%Y-%m-%d %H:%M:%S')
 

@@ -2,9 +2,6 @@
 # Работает с токенами из запроса
 command_classifier_dict = {
     # Главное меню
-    'dev': {
-       'dev', 'проверяющий', 'длиною', 'в', 'час'
-    },
     'help': {
         'навык', 'навыке', 'о', 'расскажи', 'гайд', 'научи', 'инструкция'
         'информация', 'help', 'помощь', 'как', 'пользоваться',
@@ -91,6 +88,25 @@ command_classifier_dict = {
         'entries_stop'
     },
 
+    # Статистика | Неделя
+    'one_ago': {
+        'вчера', 'один', 'вчерашний', 'вчерашнюю',
+        'день', 'вчерашняя'
+    },
+    'two_ago': {
+        'позавчера', 'два', 'позавчерашний', 'позавчерашнюю',
+        'позавчерашняя'
+    },
+    'three_ago': {
+        'три', 'позапозавчера'
+    },
+    'four_ago': {
+        'четыре'
+    },
+    'five_ago': {
+        'пять', 'дней'
+    },
+
     # Разделы помощи
     'about_skill': {
         'навык', 'навыке', 'умение', 'общая', 'общих',
@@ -121,18 +137,21 @@ command_classifier_dict = {
     # Назад | в главное меню
     'back': {
         'вернуться', 'назад', 'отменить', 'отмени', 'верни',
-        'отмена', 'предыдущий', 'back', 'главное', 'меню'
+        'отмена', 'предыдущий', 'back'
     },
     'back_to_menu': {
-        'главное', 'меню', 'в', 'back_to_menu', 'вернуться',
-        'назад', 'отменить'
+        'главное', 'меню', 'в', 'back_to_menu'
+    },
+
+    'quit': {
+        'пока', 'закрыть', 'выйти', 'выход'
     }
 }
 
 METRICS = {
     # Главное меню
     'main_menu': ['yes', 'no', 'help', 'activities',
-                  'statistic', 'what_you_can', 'dev'],
+                  'statistic', 'what_you_can', 'quit'],
 
     # Активности
     'activity_types': ['activity_work', 'activity_homework',
@@ -147,6 +166,11 @@ METRICS = {
     'entries_view': ['entries_continue', 'entries_previous',
                      'entries_stop', 'no', 'back_to_menu',
                      'get_daily_statistic'],
+    'weekly_view': {
+        'one_ago', 'two_ago', 'three_ago',
+        'four_ago', 'five_ago', 'back', 'back_to_menu',
+        'get_daily_statistic', 'get_entries'
+    },
 
     # Помощь
     'help': ['about_skill', 'about_activities', 'about_statistic',

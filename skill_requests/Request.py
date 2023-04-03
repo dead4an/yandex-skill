@@ -45,6 +45,9 @@ class Request:
         elif self.session_state == 4 or self.session_state == 6:
             self.command = classify_command(nlu_tokens, METRICS['help'])
 
+        elif self.session_state == 7:
+            self.command = classify_command(nlu_tokens, METRICS['weekly_view'])
+
     def get_user_id(self):
         """ Возвращает id пользователя """
         return self.user_id

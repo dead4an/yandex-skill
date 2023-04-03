@@ -7,7 +7,6 @@ def main(event, context):
     """ Точка входа в приложение """
     start = time.time()
     # Обработка запроса
-    # noinspection PyBroadException
     try:
         req = Request(event)
         user_id = req.get_user_id()
@@ -23,6 +22,7 @@ def main(event, context):
         dialog.process()
         print('Time: ', time.time() - start)
         return dialog.respond()
+
     except Exception:
         return {
             'response': {
