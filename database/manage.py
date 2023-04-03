@@ -41,7 +41,7 @@ VALUES ($id, $user_id, $activity_id, $start_time, $end_time, $duration, $activit
 SELECT_ACTIVITIES = """
 DECLARE $user_id AS Utf8;
 DECLARE $today_date AS Utf8;
-SELECT id, user_id, activity_id, start_time, end_time, duration, activity_type, text  
+SELECT id, user_id, activity_id, start_time, end_time, duration, activity_type, text 
 FROM activities WHERE user_id=$user_id 
 AND start_time >= $today_date 
 ORDER BY start_time DESC;"""
@@ -161,8 +161,9 @@ class DatabaseManager:
 
         activities_list = []
         for row in result_set[0].rows:
-            activities_list.append(list(row.values()))
+            activities_list.append(tuple(row.values()))
 
+        print(activities_list)
         return activities_list
 
     def select_activities_slice(self, user_id, start_slice, end_slice):
@@ -179,7 +180,7 @@ class DatabaseManager:
 
         activities_list = []
         for row in result_set[0].rows:
-            activities_list.append(list(row.values()))
+            activities_list.append(tuple(row.values()))
 
         return activities_list
 

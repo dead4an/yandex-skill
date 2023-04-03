@@ -1,6 +1,12 @@
 # Словарь для классификации запроса (cheap-NLP)
 # Работает с токенами из запроса
 command_classifier_dict = {
+    'start': {
+        'поехали', 'начать', 'давай', 'да', 'начинай',
+        'начнём', 'старт', 'вперед', 'вперёд', 'начало',
+        'дальше', 'ага', 'угу'
+    },
+
     # Главное меню
     'help': {
         'навык', 'навыке', 'о', 'расскажи', 'гайд', 'научи', 'инструкция'
@@ -151,7 +157,8 @@ command_classifier_dict = {
 METRICS = {
     # Главное меню
     'main_menu': ['yes', 'no', 'help', 'activities',
-                  'statistic', 'what_you_can', 'quit'],
+                  'statistic', 'what_you_can', 'quit',
+                  'start'],
 
     # Активности
     'activity_types': ['activity_work', 'activity_homework',

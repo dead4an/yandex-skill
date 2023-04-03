@@ -4,6 +4,10 @@ SKILL_BUTTONS = {
         'title': 'Главное меню',
         'hide': True
     },
+    'quit': {
+        'title': 'Выйти',
+        'hide': True
+    },
 
     # About
     'help': {
@@ -350,7 +354,8 @@ MAIN_MENU_BUTTONS = [
     SKILL_BUTTONS['activities'],
     SKILL_BUTTONS['statistic'],
     SKILL_BUTTONS['help'],
-    SKILL_BUTTONS['what_you_can']
+    SKILL_BUTTONS['what_you_can'],
+    SKILL_BUTTONS['quit']
 ]
 
 HELP_BUTTONS = [

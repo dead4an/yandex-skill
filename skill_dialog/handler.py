@@ -51,12 +51,14 @@ class DialogHandler:
             return
 
         # Главное меню
-        if self.session_state == 1:
-            if self.command == 'quit':
-                self.result = Response('Удачи!', end_session=True, tts='Удачки!')
-                return
+        elif self.session_state == 1:
+            if self.command == 'start':
+                self.main_menu(new_session=True)
 
-            if self.command == 'help':
+            elif self.command == 'quit':
+                self.result = Response('Удачи!', end_session=True, tts='Удачи!')
+
+            elif self.command == 'help':
                 self.help()
 
             elif self.command == 'activities':
@@ -349,8 +351,8 @@ class DialogHandler:
             return
 
         tts = (
-            'Вы можете посмотреть подробную статистику за сегодня, '
-            'общую статистику за сегодня, а также статистику за неделю. '
+            'Вы можете посмотреть подробную статистику "за сегодня", '
+            '"общую статистику за сегодня", а также статистику за неделю. '
             'Что именно вы хотите сделать?'
         )
         card = STATISTIC_CARD
@@ -422,16 +424,25 @@ class DialogHandler:
 
     def get_daily_activities_card(self, weekly=None):
         """ Возвращает карточку с общей статистикой за день"""
-        from pandas import DataFrame
         if weekly:
+            import numpy as np
             self.get_activities(weekly=True)
-            df = DataFrame(self.activities_list, columns=['uuid', 'user_id', 'activity_id', 'start_time', 'end_time',
-                                                          'duration', 'activity_type', 'text'])
-            df['start_time'] = df['start_time'].str[:10]
-            dates = df['start_time'].unique()
+            df = np.array(self.activities_list, dtype={
+                'names': ('uuid', 'user_id', 'activity_id', 'start_time', 'end_time',
+                          'duration', 'activity_type', 'text'),
+                'formats': ['U64', 'U128', 'i4', 'U64', 'U64', 'i4', 'U64', 'U64']
+            })
+
+            def slice_date(date_to_slice: str):
+                return date_to_slice[:10]
+            vectorized_slice = np.vectorize(slice_date)
+            df['start_time'] = vectorized_slice(df['start_time'])
+
+            dates = np.unique(df['start_time'])
             days = []
             day_counter = 0
-            for date in dates:
+
+            for date in dates[::-1]:
                 year = date[:4]
                 month = date[5:7]
                 day = date[8:]
@@ -493,26 +504,56 @@ class DialogHandler:
                                    'или вернуться в главное меню?')
 
     def count_activities_duration(self, date=None):
-        from pandas import DataFrame
+        import numpy as np
         if date:
-            df = DataFrame(self.activities_list, columns=['uuid', 'user_id', 'activity_id', 'start_time', 'end_time',
-                                                          'duration', 'activity_type', 'text'])
-            df['start_time'] = df['start_time'].str[:10]
-            work_duration = df.query(f"start_time=='{date}' & activity_type=='activity_work'")['duration'].sum()
-            homework_duration = df.query(f"start_time=='{date}' & activity_type=='activity_homework'")['duration'].sum()
-            hobby_duration = df.query(f"start_time=='{date}' & activity_type=='activity_hobby'")['duration'].sum()
-            sport_duration = df.query(f"start_time=='{date}' & activity_type=='activity_sport'")['duration'].sum()
-            other_duration = df.query(f"start_time=='{date}' & activity_type=='activity_other'")['duration'].sum()
+            df = np.array(self.activities_list, dtype={
+                'names': ('uuid', 'user_id', 'activity_id', 'start_time', 'end_time',
+                          'duration', 'activity_type', 'text'),
+                'formats': ['U64', 'U64', 'U64', 'U64', 'U64', 'U64', 'U64', 'U64']
+            })
+
+            def slice_date(date_to_slice: str):
+                return date_to_slice[:10]
+
+            vectorized_slice = np.vectorize(slice_date)
+            df['start_time'] = vectorized_slice(df['start_time'])
+
+            work_duration = np.sum(df[np.where((df['start_time'] == date) &
+                                             (df['activity_type'] == 'activity_work'))]['duration'].astype(int))
+
+            homework_duration = np.sum(df[np.where((df['start_time'] == date) &
+                                                 (df['activity_type'] == 'activity_homework'))]['duration'].astype(int))
+
+            hobby_duration = np.sum(df[np.where((df['start_time'] == date) &
+                                                (df['activity_type'] == 'activity_hobby'))]['duration'].astype(int))
+
+            sport_duration = np.sum(df[np.where((df['start_time'] == date) &
+                                                (df['activity_type'] == 'activity_sport'))]['duration'].astype(int))
+
+            other_duration = np.sum(df[np.where((df['start_time'] == date) &
+                                                (df['activity_type'] == 'activity_other'))]['duration'].astype(int))
 
         else:
-            df = DataFrame(self.activities_list, columns=['uuid', 'user_id', 'activity_id', 'start_time', 'end_time',
-                                                          'duration', 'activity_type', 'text'])
+            df = np.array(self.activities_list, dtype={
+                'names': ('uuid', 'user_id', 'activity_id', 'start_time', 'end_time',
+                          'duration', 'activity_type', 'text'),
+                'formats': ['U32', 'U96', 'i4', 'U64', 'U64', 'i4', 'U64', 'U64']
+            })
 
-            work_duration = df.query("activity_type=='activity_work'")['duration'].sum()
-            homework_duration = df.query("activity_type=='activity_homework'")['duration'].sum()
-            hobby_duration = df.query("activity_type=='activity_hobby'")['duration'].sum()
-            sport_duration = df.query(f"activity_type=='activity_sport'")['duration'].sum()
-            other_duration = df.query(f"activity_type=='activity_other'")['duration'].sum()
+            work_duration = np.sum(df[np.where(df['activity_type'] == 'activity_work')]
+                                       ['duration'].astype(int))
+
+            homework_duration = np.sum(df[np.where(df['activity_type'] == 'activity_homework')]
+                                       ['duration'].astype(int))
+
+            hobby_duration = np.sum(df[np.where(df['activity_type'] == 'activity_hobby')]
+                                       ['duration'].astype(int))
+
+            sport_duration = np.sum(df[np.where(df['activity_type'] == 'activity_sport')]
+                                       ['duration'].astype(int))
+
+            other_duration = np.sum(df[np.where(df['activity_type'] == 'activity_other')]
+                                       ['duration'].astype(int))
 
         if work_duration:
             work_duration = self.get_time(timestamp=work_duration)
