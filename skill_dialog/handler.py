@@ -7,14 +7,14 @@ from datetime import datetime as dt
 import pytz
 import random
 from uuid import uuid4
-from .skill_buttons import (MAIN_MENU_BUTTONS,
+from .skill_buttons import (MAIN_MENU_BUTTONS, HELP_BUTTONS,
                             ACTIVITY_TYPES, END_ACTIVITY, STATISTIC_BUTTONS, ENTRIES_BUTTONS_START,
                             ENTRIES_BUTTONS, ENTRIES_BUTTONS_END, STATISTIC_ACTIVITIES_CARD,
                             WHAT_YOU_CAN_CARD, POSSIBILITIES_BUTTONS, MAIN_MENU_CARD, HELLO_NEW_BUTTONS,
                             ACTIVITIES_CARD, ABOUT_SKILL_CARD, ABOUT_ACTIVITIES_CARD, ABOUT_STATISTIC_CARD,
                             DAILY_STATISTIC_CARD, STATISTIC_CARD, STATISTIC_BUTTONS_DAILY, STATISTIC_BUTTONS_WEEKLY,
                             STATISTIC_BUTTONS_ENTRIES, HELP_ABOUT_STATISTIC, HELP_ABOUT_SKILL, HELP_ABOUT_ACTIVITIES,
-                            WEEKLY_STATISTIC_CARD, WEEKLY_VIEW_BUTTONS, POSSIBILITIES_BUTTONS_STATISTIC)
+                            WEEKLY_STATISTIC_CARD, WEEKLY_VIEW_BUTTONS, POSSIBILITIES_BUTTONS_STATISTIC, HELP_CARD)
 
 
 class DialogHandler:
@@ -84,7 +84,7 @@ class DialogHandler:
         # Раздел активностей
         elif self.session_state == 2:
             self.set_activity_name(self.command)
-            if self.command == 'back':
+            if self.command in ['back', 'back_to_menu']:
                 self.main_menu()
                 return
 
@@ -207,6 +207,9 @@ class DialogHandler:
             elif self.command == 'statistic':
                 self.statistic()
 
+            elif self.command == 'help':
+                self.help()
+
         elif self.session_state == 10:
             if self.command in ['yes', 'entries_continue', 'repeat']:
                 self.about_possibilities()
@@ -223,8 +226,30 @@ class DialogHandler:
             elif self.command == 'statistic':
                 self.statistic()
 
+            elif self.command == 'help':
+                self.help()
+
         # Помощь
-        # elif self.session_state == 5:
+        elif self.session_state == 5 or self.command in range(51, 54):
+            if self.command in ['back', 'back_to_menu']:
+                self.main_menu()
+                return
+
+            if self.session_state == 5:
+                if self.command in ['yes', 'entries_continue']:
+                    self.help(help_state=1)
+
+            elif self.session_state == 51:
+                if self.command in ['yes', 'entries_continue']:
+                    self.help(help_state=2)
+
+            elif self.session_state == 52:
+                if self.command in ['yes', 'entries_continue']:
+                    self.help(help_state=3)
+
+            elif self.session_state == 53:
+                if self.command in ['yes', 'entries_continue']:
+                    self.help()
 
         # Раздел помощи (зацикленный + выход в меню)
         elif self.session_state == 6:
@@ -279,8 +304,8 @@ class DialogHandler:
                 self.get_daily_activities_card()
                 return
 
-            elif self.command == 'back':
-                self.get_daily_activities_card(weekly=True)
+            elif self.command == 'statistic':
+                self.statistic()
                 return
 
             elif self.command == 'back_to_menu':
@@ -289,18 +314,56 @@ class DialogHandler:
 
             card = DAILY_STATISTIC_CARD
             card.update({'items': activities_cards})
-            self.result = Response('', STATISTIC_BUTTONS_WEEKLY, card, session_state=7,
-                                   tts='Вот ваша статистика за этот день. Скажите "назад", '
-                                       'чтобы посмотреть статистику за другие дни. Или вернёмся '
-                                       'в главное меню?')
+            card['header'].update({'text': 'Вот ваша статистика за этот день'})
+            self.result = Response('', STATISTIC_BUTTONS_WEEKLY, card, session_state=8,
+                                   tts=('Вот ваша статистика за этот день. Скажите "назад", '
+                                        'чтобы посмотреть статистику за другие дни. Или вернёмся '
+                                        'в главное меню?')
+                                   )
+
+        elif self.session_state == 8:
+            if self.command == 'back':
+                self.get_daily_activities_card(weekly=True)
+
+            elif self.command == 'back_to_menu':
+                self.main_menu()
 
     def command_not_found(self):
         """ Команда не найдена """
-        text = TEXTS['command_not_found']
-        buttons = MAIN_MENU_BUTTONS
-        card = MAIN_MENU_CARD
-        card['header'].update({'text': text})
-        self.result = Response('', buttons, card, session_state=1, tts=text)
+        if self.session_state == 2:
+            text = 'Извините, но я не знаю такого вида активности'
+            tts = f'{text}. {TEXTS["activities"]}'
+            buttons = ACTIVITY_TYPES
+            card = ACTIVITIES_CARD
+            card['header'].update({'text': text})
+            self.result = Response('', buttons, card, session_state=2, tts=tts)
+
+        elif self.session_state == 3:
+            text = 'Извините, я вас не поняла. Активность за какой период вы хотите ' \
+                   'посмотреть?'
+            tts = text
+            buttons = STATISTIC_BUTTONS
+            card = STATISTIC_CARD
+            card['header'].update({'text': text})
+            self.result = Response('', buttons, card, session_state=3, tts=tts)
+
+        elif self.session_state == 7:
+            self.get_daily_activities_card(weekly=True, error=1)
+
+        elif self.session_state == 8:
+            text = (
+                'Извините, я не поняла вас. Если хотите посмотреть активность за другие дни, '
+                'скажите: "Назад". Чтобы вернуться в меню, скажите: "Главное меню"'
+            )
+            buttons = STATISTIC_BUTTONS_WEEKLY
+            self.result = Response(text, buttons, session_state=8, tts=text)
+
+        else:
+            text = TEXTS['command_not_found']
+            buttons = MAIN_MENU_BUTTONS
+            card = MAIN_MENU_CARD
+            card['header'].update({'text': text})
+            self.result = Response('', buttons, card, session_state=1, tts=text)
 
     def check_user_is_new(self):
         """ Проверка нового пользователя """
@@ -490,7 +553,7 @@ class DialogHandler:
         activities_card.update({'items': activity_items})
         return activities_card, last_page
 
-    def get_daily_activities_card(self, weekly=None):
+    def get_daily_activities_card(self, weekly=None, error=None):
         """ Возвращает карточку с общей статистикой за день"""
         if weekly:
             import numpy as np
@@ -556,8 +619,20 @@ class DialogHandler:
 
             card = WEEKLY_STATISTIC_CARD
             card.update({'items': days})
+            tts = 'Статистику за какой день Вы хотели бы увидеть?'
+            if error:
+                text = (
+                    'Извините, я не поняла вас. Что именно вы хотите сделать?'
+                )
+                card['header'].update({'text': text})
+                tts = (
+                    'Извините, я не поняла вас. Если вы хотите вернуться в главное меню, '
+                    'скажите "Главное меню". Если вы хотите вернуться в раздел статистики, '
+                    'скажите "Статистика"'
+                )
+
             self.result = Response('', WEEKLY_VIEW_BUTTONS, card, session_state=7,
-                                   tts='Статистику за какой день Вы хотели бы увидеть?')
+                                   tts=tts)
             return
 
         self.get_activities()
@@ -777,13 +852,45 @@ class DialogHandler:
         return
 
     # Помощь
-    def help(self):
+    def help(self, help_state=0):
         """ Помощь пользователю """
-        text = 'О чём именно вы хотите узнать?'
-        buttons = POSSIBILITIES_BUTTONS
-        card = WHAT_YOU_CAN_CARD
+        text = 'Вот инструкция'
+        buttons = HELP_BUTTONS
+        card = HELP_CARD
         card['header'].update({'text': text})
-        self.result = Response('', buttons, card, session_state=4, tts=text)
+        if help_state == 0:
+            tts = (
+                'Чтобы начать отслеживать активность, скажите: "Начать активность". '
+                'В разделе активностей Вам будет предложено выбрать вид активности, которую вы '
+                'хотите начать отслеживать. Навык запомнит время начала активности, а также её вид.'
+                'Продолжить?'
+            )
+            self.result = Response('', buttons, card, session_state=5, tts=tts)
+
+        elif help_state == 1:
+            tts = (
+                'Чтобы закончить активность, скажите: "Закончить активность". '
+                'Вы увидите информацию об активности с просьбой подтвердить '
+                'завершение активности. Чтобы завершить, скажите: "Завершить". '
+                'Чтобы отменить завершение, скажите: "Отменить". Продолжить?'
+            )
+            self.result = Response('', buttons, card, session_state=51, tts=tts)
+
+        elif help_state == 2:
+            tts = (
+                'Чтобы узнать свою статистику, скажите: "Статистика". Чтобы увидеть '
+                'записи о всех активностях, в разделе статистики скажите "Подробная статистика". '
+                'Для получения общей статистики за этот день, скажите: "Сегодня". Продолжить?'
+            )
+            self.result = Response('', buttons, card, session_state=52, tts=tts)
+
+        else:
+            tts = (
+                'Чтобы узнать свою статистику за предыдущие дни, перейдите в раздел статистики, '
+                'сказав: "Статистика". Далее скажите: "Статистика за неделю" и выберите день, '
+                'статистику за который Вы хотите узнать. Продолжить?'
+            )
+            self.result = Response('', buttons, card, session_state=53, tts=tts)
 
     def about_skill(self):
         tts = (

@@ -48,11 +48,17 @@ class Request:
         elif self.session_state == 10:
             self.command = classify_command(nlu_tokens, METRICS['what_you_can_repeat'])
 
+        elif self.session_state == 5:
+            self.command = classify_command(nlu_tokens, METRICS['help'])
+
         elif self.session_state == 6:
             self.command = classify_command(nlu_tokens, METRICS['help'])
 
         elif self.session_state == 7:
             self.command = classify_command(nlu_tokens, METRICS['weekly_view'])
+
+        elif self.session_state == 8:
+            self.command = classify_command(nlu_tokens, METRICS['weekly_view_day'])
 
     def get_user_id(self):
         """ Возвращает id пользователя """

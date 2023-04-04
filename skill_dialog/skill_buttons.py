@@ -96,11 +96,11 @@ SKILL_BUTTONS = {
         'hide': True
     },
     'get_daily_statistic': {
-        'title': 'Статистика за сегодня',
+        'title': 'Сегодня',
         'hide': True
     },
     'get_weekly_statistic': {
-        'title': 'Статистика за неделю',
+        'title': 'Неделя',
         'hide': True
     },
 
@@ -157,14 +157,6 @@ WHAT_YOU_CAN_CARD = {
     },
     'items': [
         {
-            'image_id': '997614/0153ace46ab56d666c5f',
-            'title': 'Главное меню',
-            'description': 'Вернуться в главное меню',
-            'button': {
-                'text': 'Главное меню'
-            }
-        },
-        {
             'image_id': '997614/44b0c878d3ebeea64a34',
             'title': 'Отслеживайте свои активности',
             'description': 'Попросите меня начать отслеживать активность, назовите вид активности, '
@@ -172,7 +164,7 @@ WHAT_YOU_CAN_CARD = {
                            'попросите меня закончить активность и я добавлю запись о ней в вашу '
                            'статистику',
             'button': {
-                'text': 'Об активностях'
+                'text': 'Активности'
             }
         },
         {
@@ -182,7 +174,7 @@ WHAT_YOU_CAN_CARD = {
                            'посмотреть информацию о ней в разделе "Статистика". В этом же разделе '
                            'Вы сможете узнать свою статистику за последнюю неделю',
             'button': {
-                'text': 'О статистике'
+                'text': 'Статистика'
             }
         },
         {
@@ -366,6 +358,51 @@ ABOUT_STATISTIC_CARD = {
     )
 }
 
+HELP_CARD = {
+    'type': 'ItemsList',
+    'header': {
+        'text': 'Вот инструкция по использованию навыка'
+    },
+    'items': [
+        {
+            'image_id': '1030494/ef76cc359fe02ddf9efb',
+            'title': 'Начало активности',
+            'description': (
+                'Чтобы начать отслеживать активность, скажите: "Начать активность". '
+                'В разделе активностей Вам будет предложено выбрать вид активности, которую вы '
+                'хотите начать отслеживать. Навык запомнит время начала активности, а также её вид.'
+            )
+        },
+        {
+            'image_id': '965417/74d4f56a9ce904a206eb',
+            'title': 'Завершение активности',
+            'description': (
+                'Чтобы закончить активность, скажите: "Закончить активность". '
+                'Вы увидите информацию об активности с просьбой подтвердить '
+                'завершение активности. Чтобы завершить, скажите: "Завершить". '
+                'Чтобы отменить завершение, скажите: "Отменить".'
+            )
+        },
+        {
+            'image_id': '1030494/2b850cdd7d98cc1284be',
+            'title': 'Просмотр статистики за сегодня',
+            'description': (
+                'Чтобы узнать свою статистику, скажите: "Статистика". Чтобы увидеть '
+                'записи о всех активностях, в разделе статистики скажите "Подробная статистика". '
+                'Для получения общей статистики за этот день, скажите: "Сегодня".'
+            )
+        },
+        {
+            'image_id': '1652229/244c078ca09c64900c2b',
+            'title': 'Просмотр статистики за неделю',
+            'description': (
+                'Чтобы узнать свою статистику за предыдущие дни, перейдите в раздел статистики, '
+                'сказав: "Статистика". Далее скажите: "Статистика за неделю" и выберите день, '
+                'статистику за который Вы хотите узнать.'
+            )
+        }
+    ]
+}
 
 MAIN_MENU_BUTTONS = [
     SKILL_BUTTONS['activities'],
@@ -376,22 +413,20 @@ MAIN_MENU_BUTTONS = [
 ]
 
 HELP_BUTTONS = [
-    SKILL_BUTTONS['about_skill'],
-    SKILL_BUTTONS['about_activities'],
-    SKILL_BUTTONS['about_statistic'],
-    SKILL_BUTTONS['back']
+    SKILL_BUTTONS['main_menu'],
+    SKILL_BUTTONS['what_you_can']
 ]
 
 HELP_ABOUT_SKILL = [
     SKILL_BUTTONS['about_activities'],
     SKILL_BUTTONS['about_statistic'],
-    SKILL_BUTTONS['back']
+    SKILL_BUTTONS['main_menu']
 ]
 
 HELP_ABOUT_ACTIVITIES = [
     SKILL_BUTTONS['about_skill'],
     SKILL_BUTTONS['about_statistic'],
-    SKILL_BUTTONS['back']
+    SKILL_BUTTONS['main_menu']
 ]
 
 HELP_ABOUT_STATISTIC = [
@@ -405,7 +440,7 @@ ACTIVITY_TYPES = [
     SKILL_BUTTONS['activity_homework'],
     SKILL_BUTTONS['activity_hobby'],
     SKILL_BUTTONS['activity_sport'],
-    SKILL_BUTTONS['back']
+    SKILL_BUTTONS['main_menu']
 ]
 
 END_ACTIVITY = [
@@ -419,19 +454,19 @@ STATISTIC_BUTTONS = [
     SKILL_BUTTONS['get_entries'],
     SKILL_BUTTONS['get_daily_statistic'],
     SKILL_BUTTONS['get_weekly_statistic'],
-    SKILL_BUTTONS['back']
+    SKILL_BUTTONS['main_menu']
 ]
 
 STATISTIC_BUTTONS_ENTRIES = [
     SKILL_BUTTONS['get_daily_statistic'],
     SKILL_BUTTONS['get_weekly_statistic'],
-    SKILL_BUTTONS['back']
+    SKILL_BUTTONS['main_menu']
 ]
 
 STATISTIC_BUTTONS_DAILY = [
     SKILL_BUTTONS['get_entries'],
     SKILL_BUTTONS['get_weekly_statistic'],
-    SKILL_BUTTONS['back']
+    SKILL_BUTTONS['main_menu']
 ]
 
 STATISTIC_BUTTONS_WEEKLY = [
@@ -447,30 +482,32 @@ WEEKLY_VIEW_BUTTONS = [
 
 ENTRIES_BUTTONS_START = [
     SKILL_BUTTONS['entries_continue'],
-    SKILL_BUTTONS['entries_stop'],
     SKILL_BUTTONS['get_daily_statistic'],
-    SKILL_BUTTONS['get_weekly_statistic']
+    SKILL_BUTTONS['get_weekly_statistic'],
+    SKILL_BUTTONS['main_menu']
 ]
 
 ENTRIES_BUTTONS = [
     SKILL_BUTTONS['entries_continue'],
     SKILL_BUTTONS['entries_previous'],
-    SKILL_BUTTONS['entries_stop'],
     SKILL_BUTTONS['get_daily_statistic'],
-    SKILL_BUTTONS['get_weekly_statistic']
+    SKILL_BUTTONS['get_weekly_statistic'],
+    SKILL_BUTTONS['main_menu']
 ]
 
 ENTRIES_BUTTONS_END = [
     SKILL_BUTTONS['entries_previous'],
     SKILL_BUTTONS['entries_stop'],
     SKILL_BUTTONS['get_daily_statistic'],
-    SKILL_BUTTONS['get_weekly_statistic']
+    SKILL_BUTTONS['get_weekly_statistic'],
+    SKILL_BUTTONS['main_menu']
 ]
 
 ENTRIES_ONLY_ONE_PAGE = [
     SKILL_BUTTONS['get_daily_statistic'],
     SKILL_BUTTONS['get_weekly_statistic'],
-    SKILL_BUTTONS['back']
+    SKILL_BUTTONS['back'],
+    SKILL_BUTTONS['main_menu']
 ]
 
 POSSIBILITIES_BUTTONS = [

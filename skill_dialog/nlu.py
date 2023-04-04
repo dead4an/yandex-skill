@@ -168,7 +168,8 @@ METRICS = {
     # Активности
     'activity_types': ['activity_work', 'activity_homework',
                        'activity_hobby', 'activity_sport',
-                       'activity_other', 'back', 'statistic'],
+                       'activity_other', 'back', 'statistic',
+                       'back_to_menu'],
     'close_activity': ['close_activity', 'continue_activity'],
 
     # Статистика
@@ -181,18 +182,23 @@ METRICS = {
 
     'weekly_view': {
         'one_ago', 'two_ago', 'three_ago',
-        'four_ago', 'five_ago', 'back', 'back_to_menu',
+        'four_ago', 'five_ago', 'back_to_menu',
         'get_daily_statistic', 'get_entries'
+    },
+
+    'weekly_view_day': {
+        'back', 'back_to_menu'
     },
 
     'what_you_can': {
         'yes', 'entries_continue', 'no', 'back_to_menu',
-        'about_skill', 'activities', 'statistic'
+        'about_skill', 'activities', 'statistic', 'help'
     },
 
     'what_you_can_repeat': {
         'yes', 'no', 'repeat', 'back_to_menu',
-        'about_skill', 'activities', 'statistic'
+        'about_skill', 'activities', 'statistic',
+        'help'
     },
 
     # Помощь
