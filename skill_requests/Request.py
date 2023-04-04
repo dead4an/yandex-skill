@@ -42,7 +42,13 @@ class Request:
         elif self.session_state >= 31:
             self.command = classify_command(nlu_tokens, METRICS['entries_view'])
 
-        elif self.session_state == 4 or self.session_state == 6:
+        elif self.session_state == 4:
+            self.command = classify_command(nlu_tokens, METRICS['what_you_can'])
+
+        elif self.session_state == 10:
+            self.command = classify_command(nlu_tokens, METRICS['what_you_can_repeat'])
+
+        elif self.session_state == 6:
             self.command = classify_command(nlu_tokens, METRICS['help'])
 
         elif self.session_state == 7:

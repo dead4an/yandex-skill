@@ -14,7 +14,7 @@ from .skill_buttons import (MAIN_MENU_BUTTONS,
                             ACTIVITIES_CARD, ABOUT_SKILL_CARD, ABOUT_ACTIVITIES_CARD, ABOUT_STATISTIC_CARD,
                             DAILY_STATISTIC_CARD, STATISTIC_CARD, STATISTIC_BUTTONS_DAILY, STATISTIC_BUTTONS_WEEKLY,
                             STATISTIC_BUTTONS_ENTRIES, HELP_ABOUT_STATISTIC, HELP_ABOUT_SKILL, HELP_ABOUT_ACTIVITIES,
-                            WEEKLY_STATISTIC_CARD, WEEKLY_VIEW_BUTTONS)
+                            WEEKLY_STATISTIC_CARD, WEEKLY_VIEW_BUTTONS, POSSIBILITIES_BUTTONS_STATISTIC)
 
 
 class DialogHandler:
@@ -40,11 +40,14 @@ class DialogHandler:
             if self.command is None:
                 self.new_session()
 
-            elif self.command == 'activities':
+            elif self.command in ['activities', 'start']:
                 self.activities()
 
             elif self.command == 'statistic':
                 self.statistic()
+
+            elif self.command == 'what_you_can':
+                self.about_possibilities()
 
         elif self.command is None:
             self.command_not_found()
@@ -144,7 +147,14 @@ class DialogHandler:
                 self.activities()
 
         # Просмотр подробной статистики за день
-        elif self.session_state >= 31:
+        elif 31 <= self.session_state <= 50:
+            if self.session_state == 50:
+                text = 'Вы посмотрели максимально доступное количество записей за сегодня'
+                tts = f'{text}. Хотите начать отслеживать новую активность или узнать статистику? ' \
+                      f'Если вам нужна помощь - скажите "Помощь".'
+                card = MAIN_MENU_CARD
+                card['header'].update({'text': text})
+
             if self.command == 'entries_continue':
                 text = ''
                 start = 5 * (self.session_state - 30)
@@ -170,7 +180,7 @@ class DialogHandler:
                 self.result = Response(text, ENTRIES_BUTTONS, activities_card,
                                        session_state=self.session_state - 1)
 
-            elif self.command in ['entries_stop', 'no', 'back_to_menu']:
+            elif self.command in ['no', 'back_to_menu']:
                 self.main_menu()
 
             elif self.command == 'get_daily_statistic':
@@ -182,14 +192,39 @@ class DialogHandler:
 
         # Что ты умеешь
         elif self.session_state == 4:
-            if self.command == 'about_skill':
-                self.about_skill()
-            elif self.command == 'about_activities':
-                self.about_activities()
-            elif self.command == 'about_statistic':
-                self.about_statistic()
-            elif self.command in 'back' or 'back_to_menu':
+            if self.command in ['yes', 'entries_continue']:
+                self.about_possibilities(pos_state=1)
+
+            elif self.command in ['no', 'back_to_menu']:
                 self.main_menu()
+
+            elif self.command == 'about_skill':
+                self.about_skill()
+
+            elif self.command == 'activities':
+                self.activities()
+
+            elif self.command == 'statistic':
+                self.statistic()
+
+        elif self.session_state == 10:
+            if self.command in ['yes', 'entries_continue', 'repeat']:
+                self.about_possibilities()
+
+            elif self.command in ['no', 'back_to_menu']:
+                self.main_menu()
+
+            elif self.command == 'about_skill':
+                self.about_skill()
+
+            elif self.command == 'activities':
+                self.activities()
+
+            elif self.command == 'statistic':
+                self.statistic()
+
+        # Помощь
+        # elif self.session_state == 5:
 
         # Раздел помощи (зацикленный + выход в меню)
         elif self.session_state == 6:
@@ -201,6 +236,8 @@ class DialogHandler:
                 self.about_statistic()
             elif self.command in 'back' or 'back_to_menu':
                 self.main_menu()
+            elif self.command == 'what_you_can':
+                self.about_possibilities()
 
         # Статистика за день
         elif self.session_state == 7:
@@ -318,32 +355,51 @@ class DialogHandler:
                                session_state=1, tts=tts)
 
     # Что ты умеешь
-    def about_possibilities(self):
+    def about_possibilities(self, pos_state=0):
         """ Краткая информация о навыке """
-        text = 'О чём именно вы хотите узнать?'
-        tts = TEXTS['what_you_can']
-        buttons = POSSIBILITIES_BUTTONS
-        card = WHAT_YOU_CAN_CARD
-        card['header'].update({'text': text})
-        self.result = Response(text, buttons, card,
-                               session_state=4, tts=tts)
+
+        if pos_state == 0:
+            text = 'Вот, что я могу'
+            tts = TEXTS['what_you_can_activities']
+            buttons = POSSIBILITIES_BUTTONS
+            card = WHAT_YOU_CAN_CARD
+            card['header'].update({'text': text})
+            self.result = Response('', buttons, card,
+                                   session_state=4, tts=tts)
+
+        elif pos_state == 1:
+            text = 'Вот, что я могу'
+            tts = TEXTS['what_you_can_statistic']
+            buttons = POSSIBILITIES_BUTTONS_STATISTIC
+            card = WHAT_YOU_CAN_CARD
+            card['header'].update({'text': text})
+            self.result = Response('', buttons, card,
+                                   session_state=10, tts=tts)
 
     # Активности
     def activities(self):
         """ Раздел активностей """
+        self.get_last_checkin()
+        if self.last_checkin and self.last_checkin['checkin_type'] == 'start':
+            self.close_activity(confirm_state_std=True, already_observe=True)
+            return
+
         text = random.choice(TEXTS['activities_rand'])
         tts = text + TEXTS['activities']
         buttons = ACTIVITY_TYPES
         card = ACTIVITIES_CARD
         card['header'].update({'text': text})
         self.result = Response('', buttons, card, session_state=2, tts=tts)
+        return
 
     def statistic(self):
-        today_date = dt.strftime(dt.date(self.get_time(return_timestamp=True)), '%Y-%m-%d')
+        latest_date = self.get_time(return_timestamp=True)
+        day_delta = datetime.timedelta(hours=24)
+        latest_date = dt.strftime(latest_date - day_delta * 5, '%Y-%m-%d 00:00:00')
         db = DatabaseManager()
-        if not db.check_activity(self.__user_id, today_date):
-            text = 'Похоже, сегодня Вы ещё не закончили ни одной активности! '
-            tts = f'{text}{TEXTS["main_menu"]}'
+        if not db.check_activity(self.__user_id, latest_date):
+            text = 'Похоже, Вы не закончили ни одной активности за последнюю неделю'
+            tts = f'{text}. Хотите начать отслеживать новую активность или получить помощь?'
             buttons = MAIN_MENU_BUTTONS
             card = MAIN_MENU_CARD
             card['header'].update({'text': text})
@@ -360,6 +416,18 @@ class DialogHandler:
         self.result = Response('', buttons, card, session_state=3, tts=tts)
 
     def daily_statistic(self):
+        db = DatabaseManager()
+        today_date = self.get_time(return_timestamp=True)
+        today_date = dt.strftime(today_date, '%Y-%m-%d 00:00:00')
+        if not db.check_activity(self.__user_id, today_date):
+            text = 'Похоже, сегодня вы не закончили ни одной активности'
+            tts = f'{text}. Хотите начать отслеживать новую активность, узнать статистику, или получить помощь?'
+            buttons = MAIN_MENU_BUTTONS
+            card = MAIN_MENU_CARD
+            card['header'].update({'text': text})
+            self.result = Response('', buttons, card, session_state=1, tts=tts)
+            return
+
         text = ''
         activities_card, last_page = self.get_activities_card(0)
         buttons = STATISTIC_BUTTONS_ENTRIES
@@ -435,23 +503,21 @@ class DialogHandler:
 
             def slice_date(date_to_slice: str):
                 return date_to_slice[:10]
+
             vectorized_slice = np.vectorize(slice_date)
             df['start_time'] = vectorized_slice(df['start_time'])
 
-            dates = np.unique(df['start_time'])
+            dates = np.unique(df['start_time'])[:-1]
+            print(dates)
             days = []
-            day_counter = 0
+            day_counter = 1
 
             for date in dates[::-1]:
                 year = date[:4]
                 month = date[5:7]
                 day = date[8:]
 
-                if day_counter == 0:
-                    day_counter += 1
-                    continue
-
-                elif day_counter == 1:
+                if day_counter == 1:
                     day_name = 'Вчера'
                     image_id = '1030494/13ccbfe97e126e8743e8'
                 elif day_counter == 2:
@@ -495,6 +561,15 @@ class DialogHandler:
             return
 
         self.get_activities()
+        if not self.activities_list:
+            text = 'Похоже, Вы ещё не закончили ни одной активности за сегодня'
+            tts = f'{text}. Хотите начать отслеживать новую активность или вам нужна помощь?'
+            buttons = MAIN_MENU_BUTTONS
+            card = MAIN_MENU_CARD
+            card['header'].update({'text': text})
+            self.result = Response('', buttons, card, session_state=1, tts=tts)
+            return
+
         activities_cards = self.count_activities_duration()
         buttons = STATISTIC_BUTTONS_DAILY
         daily_card = DAILY_STATISTIC_CARD
@@ -509,7 +584,7 @@ class DialogHandler:
             df = np.array(self.activities_list, dtype={
                 'names': ('uuid', 'user_id', 'activity_id', 'start_time', 'end_time',
                           'duration', 'activity_type', 'text'),
-                'formats': ['U64', 'U64', 'U64', 'U64', 'U64', 'U64', 'U64', 'U64']
+                'formats': ['U128', 'U128', 'U128', 'U128', 'U128', 'U128', 'U128', 'U128']
             })
 
             def slice_date(date_to_slice: str):
@@ -518,42 +593,47 @@ class DialogHandler:
             vectorized_slice = np.vectorize(slice_date)
             df['start_time'] = vectorized_slice(df['start_time'])
 
-            work_duration = np.sum(df[np.where((df['start_time'] == date) &
-                                             (df['activity_type'] == 'activity_work'))]['duration'].astype(int))
+            work_duration = np.sum(
+                df[np.where((df['start_time'] == date) &
+                            (df['activity_type'] == 'activity_work'))]['duration'].astype(int))
 
-            homework_duration = np.sum(df[np.where((df['start_time'] == date) &
-                                                 (df['activity_type'] == 'activity_homework'))]['duration'].astype(int))
+            homework_duration = np.sum(df[np.where(
+                (df['start_time'] == date) &
+                (df['activity_type'] == 'activity_homework'))]['duration'].astype(int))
 
-            hobby_duration = np.sum(df[np.where((df['start_time'] == date) &
-                                                (df['activity_type'] == 'activity_hobby'))]['duration'].astype(int))
+            hobby_duration = np.sum(df[np.where(
+                (df['start_time'] == date) &
+                (df['activity_type'] == 'activity_hobby'))]['duration'].astype(int))
 
-            sport_duration = np.sum(df[np.where((df['start_time'] == date) &
-                                                (df['activity_type'] == 'activity_sport'))]['duration'].astype(int))
+            sport_duration = np.sum(df[np.where(
+                (df['start_time'] == date) &
+                (df['activity_type'] == 'activity_sport'))]['duration'].astype(int))
 
-            other_duration = np.sum(df[np.where((df['start_time'] == date) &
-                                                (df['activity_type'] == 'activity_other'))]['duration'].astype(int))
+            other_duration = np.sum(df[np.where(
+                (df['start_time'] == date) &
+                (df['activity_type'] == 'activity_other'))]['duration'].astype(int))
 
         else:
             df = np.array(self.activities_list, dtype={
                 'names': ('uuid', 'user_id', 'activity_id', 'start_time', 'end_time',
                           'duration', 'activity_type', 'text'),
-                'formats': ['U32', 'U96', 'i4', 'U64', 'U64', 'i4', 'U64', 'U64']
+                'formats': ['U128', 'U128', 'U128', 'U128', 'U128', 'U128', 'U128', 'U128']
             })
 
             work_duration = np.sum(df[np.where(df['activity_type'] == 'activity_work')]
-                                       ['duration'].astype(int))
+                                   ['duration'].astype(int))
 
             homework_duration = np.sum(df[np.where(df['activity_type'] == 'activity_homework')]
                                        ['duration'].astype(int))
 
             hobby_duration = np.sum(df[np.where(df['activity_type'] == 'activity_hobby')]
-                                       ['duration'].astype(int))
+                                    ['duration'].astype(int))
 
             sport_duration = np.sum(df[np.where(df['activity_type'] == 'activity_sport')]
-                                       ['duration'].astype(int))
+                                    ['duration'].astype(int))
 
             other_duration = np.sum(df[np.where(df['activity_type'] == 'activity_other')]
-                                       ['duration'].astype(int))
+                                    ['duration'].astype(int))
 
         if work_duration:
             work_duration = self.get_time(timestamp=work_duration)
@@ -633,7 +713,7 @@ class DialogHandler:
         today_date = dt.strftime(dt.date(self.get_time(return_timestamp=True)), '%Y-%m-%d')
         self.activities_list = db.select_activities(self.__user_id, today_date)
 
-    def close_activity(self, confirm_state_std=False):
+    def close_activity(self, confirm_state_std=False, already_observe=None):
         self.get_last_checkin()
         self.set_activity_name(self.last_checkin['activity_type'])
         db = DatabaseManager()
@@ -656,6 +736,14 @@ class DialogHandler:
 
         if activity_duration < 60:
             activity_duration_timestamp = 'меньше минуты'
+
+        if confirm_state_std and already_observe:
+            text = f'Похоже у вас уже есть начатая активность\n' \
+                   f'Активность: {self.activity_name} \nНачало: {start_time_show}\n' \
+                   f'Продолжительность: {activity_duration_timestamp}\nХотите завершить активность?"'
+            buttons = END_ACTIVITY
+            self.result = Response(text, buttons, session_state=21)
+            return
 
         if confirm_state_std:
             text = f'Активность: {self.activity_name} \nНачало: {start_time_show}\n' \
@@ -691,12 +779,11 @@ class DialogHandler:
     # Помощь
     def help(self):
         """ Помощь пользователю """
-        tts = TEXTS['help']
         text = 'О чём именно вы хотите узнать?'
         buttons = POSSIBILITIES_BUTTONS
         card = WHAT_YOU_CAN_CARD
         card['header'].update({'text': text})
-        self.result = Response('', buttons, card, session_state=4, tts=tts)
+        self.result = Response('', buttons, card, session_state=4, tts=text)
 
     def about_skill(self):
         tts = (

@@ -9,7 +9,7 @@ command_classifier_dict = {
 
     # Главное меню
     'help': {
-        'навык', 'навыке', 'о', 'расскажи', 'гайд', 'научи', 'инструкция'
+        'гайд', 'научи', 'инструкция'
         'информация', 'help', 'помощь', 'как', 'пользоваться',
         'использовать', 'навыком', 'мне', 'почему'
     },
@@ -25,7 +25,8 @@ command_classifier_dict = {
         'показать', 'показывай', 'statistic'
     },
     'what_you_can': {
-        'что', 'ты', 'умеешь', 'можешь', 'what_you_can'
+        'что', 'ты', 'умеешь', 'можешь', 'what_you_can',
+        'навыке', 'навык', 'умеет', 'рассказать', 'расскажет'
     },
 
     # Активности
@@ -83,15 +84,13 @@ command_classifier_dict = {
     # Статистика | пагинация
     'entries_continue': {
         'далее', 'продолжи', 'продолжать', 'следующая',
-        'дальше', 'следующие', 'следующую', 'вперёд', 'вперед'
+        'дальше', 'следующие', 'следующую', 'вперёд', 'вперед',
+        'продолжим', 'продолжаем'
     },
     'entries_previous': {
         'назад', 'предыдущая', 'прошлая',
-        'до', 'entries_previous', 'вернуться',
+        'до', 'entries_previous',
         'перед', 'предыдущую'
-    },
-    'entries_stop': {
-        'entries_stop'
     },
 
     # Статистика | Неделя
@@ -128,6 +127,10 @@ command_classifier_dict = {
         'визуализация', 'about_statistic', 'статистику',
         'статистики'
     },
+    'repeat': {
+        'повтори', 'ещё', 'раз', 'снова', 'заново',
+        'повтор', 'повторить', 'повторяй'
+    },
 
     # Подтверждение | отрицание
     'yes': {
@@ -135,6 +138,7 @@ command_classifier_dict = {
         'именно', 'продолжи', 'продолжай', 'угу', 'так',
         'согласен', 'согласна', 'поехали', 'yes', 'начнем',
     },
+
     'no': {
         'нет', 'не-а', 'не', 'отмени', 'отмена', 'верни',
         'стой', 'стоп', 'подожди', 'потом', 'никак', 'no',
@@ -145,6 +149,7 @@ command_classifier_dict = {
         'вернуться', 'назад', 'отменить', 'отмени', 'верни',
         'отмена', 'предыдущий', 'back'
     },
+
     'back_to_menu': {
         'главное', 'меню', 'в', 'back_to_menu'
     },
@@ -170,18 +175,29 @@ METRICS = {
     'statistic': ['get_entries', 'get_daily_statistic',
                   'get_weekly_statistic', 'back', 'back_to_menu',
                   'activities'],
+
     'entries_view': ['entries_continue', 'entries_previous',
-                     'entries_stop', 'no', 'back_to_menu',
-                     'get_daily_statistic'],
+                     'no', 'back_to_menu', 'get_daily_statistic'],
+
     'weekly_view': {
         'one_ago', 'two_ago', 'three_ago',
         'four_ago', 'five_ago', 'back', 'back_to_menu',
         'get_daily_statistic', 'get_entries'
     },
 
+    'what_you_can': {
+        'yes', 'entries_continue', 'no', 'back_to_menu',
+        'about_skill', 'activities', 'statistic'
+    },
+
+    'what_you_can_repeat': {
+        'yes', 'no', 'repeat', 'back_to_menu',
+        'about_skill', 'activities', 'statistic'
+    },
+
     # Помощь
     'help': ['about_skill', 'about_activities', 'about_statistic',
-             'back', 'back_to_menu']
+             'what_you_can', 'back', 'back_to_menu']
 }
 
 

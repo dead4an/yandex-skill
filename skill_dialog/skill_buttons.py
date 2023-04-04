@@ -11,7 +11,7 @@ SKILL_BUTTONS = {
 
     # About
     'help': {
-        'title': '\U0001F4D6 Помощь',
+        'title': 'Помощь',
         'hide': True
     },
     'about_skill': {
@@ -27,14 +27,25 @@ SKILL_BUTTONS = {
         'hide': True
     },
 
+    # What you can
     'what_you_can': {
         'title': 'Что ты умеешь?',
         'hide': True
     },
 
+    'what_you_can_continue': {
+        'title': 'Продолжи',
+        'hide': True
+    },
+
+    'what_you_can_repeat': {
+        'title': 'Повтори',
+        'hide': True
+    },
+
     # Activities
     'activities': {
-        'title': '\U00002705 Активности',
+        'title': 'Активности',
         'hide': True
     },
     'activity_work': {
@@ -77,7 +88,7 @@ SKILL_BUTTONS = {
     },
     # Statistic
     'statistic': {
-        'title': '\U0001F4CA Статистика',
+        'title': 'Статистика',
         'hide': True
     },
     'get_entries': {
@@ -109,7 +120,7 @@ SKILL_BUTTONS = {
 
     # Other
     'hello_new_hide': {
-        'title': '\U0001F525 Поехали',
+        'title': 'Поехали',
         'hide': True
     },
     'back': {
@@ -148,34 +159,40 @@ WHAT_YOU_CAN_CARD = {
         {
             'image_id': '997614/0153ace46ab56d666c5f',
             'title': 'Главное меню',
-            'description': 'Перейдите в интересующий вас раздел',
+            'description': 'Вернуться в главное меню',
             'button': {
-                'title': 'В главное меню'
+                'text': 'Главное меню'
             }
         },
         {
             'image_id': '997614/44b0c878d3ebeea64a34',
-            'title': 'Активности',
-            'description': 'Здесь вы можете начать или закончить Активность. Хотите узнать больше?',
+            'title': 'Отслеживайте свои активности',
+            'description': 'Попросите меня начать отслеживать активность, назовите вид активности, '
+                           'а всё остальное сделаю я. Как только вы закончите свои дела - просто '
+                           'попросите меня закончить активность и я добавлю запись о ней в вашу '
+                           'статистику',
             'button': {
-                'title': 'Об активностях'
+                'text': 'Об активностях'
             }
         },
         {
             'image_id': '1030494/a386ca38d555d4e1f6d8',
-            'title': 'Статистика',
-            'description': 'В этом разделе вы сможете взглянуть на результаты своих трудов. '
-                           'Рассказать о нём?',
+            'title': 'Узнайте свою статистику',
+            'description': 'Как только у вас появится первая запись об активности, Вы сможете '
+                           'посмотреть информацию о ней в разделе "Статистика". В этом же разделе '
+                           'Вы сможете узнать свою статистику за последнюю неделю',
             'button': {
-                'title': 'О статистике'
+                'text': 'О статистике'
             }
         },
         {
             'image_id': '1533899/4b1c74d2a1681bdcf64f',
-            'title': 'Навык',
-            'description': 'Если хотите узнать больше о навыке, то вам сюда',
+            'title': 'Помощь',
+            'description': 'В разделе помощи я подробно расскажу Вам о том, как пользоваться навыком '
+                           'и приведу примеры команд, которыми Вы можете пользоваться. Нажмите, чтобы '
+                           'перейти в раздел помощи',
             'button': {
-                'title': 'О навыке'
+                'title': 'Помощь'
             }
         }
     ],
@@ -190,7 +207,7 @@ MAIN_MENU_CARD = {
         {
             'image_id': '997614/44b0c878d3ebeea64a34',
             'title': 'Активности',
-            'description': 'Здесь вы можете начать или закончить Активность',
+            'description': 'Здесь Вы можете начать или закончить отслеживать активность',
             'button': {
                 'text': 'Активности'
             }
@@ -198,7 +215,7 @@ MAIN_MENU_CARD = {
         {
             'image_id': '1030494/a386ca38d555d4e1f6d8',
             'title': 'Статистика',
-            'description': 'В этом разделе вы сможете взглянуть на результаты своих трудов',
+            'description': 'В этом разделе Вы сможете взглянуть на результаты своих трудов',
             'button': {
                 'text': 'Статистика'
             }
@@ -458,9 +475,18 @@ ENTRIES_ONLY_ONE_PAGE = [
 
 POSSIBILITIES_BUTTONS = [
     SKILL_BUTTONS['main_menu'],
-    SKILL_BUTTONS['about_activities'],
-    SKILL_BUTTONS['about_statistic'],
-    SKILL_BUTTONS['about_skill']
+    SKILL_BUTTONS['what_you_can_continue'],
+    SKILL_BUTTONS['help'],
+    SKILL_BUTTONS['activities'],
+    SKILL_BUTTONS['statistic']
+]
+
+POSSIBILITIES_BUTTONS_STATISTIC = [
+    SKILL_BUTTONS['main_menu'],
+    SKILL_BUTTONS['what_you_can_repeat'],
+    SKILL_BUTTONS['help'],
+    SKILL_BUTTONS['activities'],
+    SKILL_BUTTONS['statistic']
 ]
 
 HELLO_NEW_BUTTONS = [
