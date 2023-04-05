@@ -77,6 +77,15 @@ class DialogHandler:
             if self.command in ['no', 'quit']:
                 self.end_session()
 
+            elif self.command == 'help':
+                self.help()
+
+            elif self.command == 'activities':
+                self.activities()
+
+            elif self.command == 'statistic':
+                self.statistic()
+
             else:
                 self.about_possibilities()
 
@@ -348,13 +357,29 @@ class DialogHandler:
             self.result = Response('', buttons, card, session_state=2, tts=tts)
 
         elif self.session_state == 3:
-            text = 'Извините, я вас не поняла. Активность за какой период вы хотите ' \
+            text = 'Извините, я вас не поняла. Активность за какой период Вы хотите ' \
                    'посмотреть?'
             tts = text
             buttons = STATISTIC_BUTTONS
             card = STATISTIC_CARD
             card['header'].update({'text': text})
             self.result = Response('', buttons, card, session_state=3, tts=tts)
+
+        elif self.session_state == 4:
+            text = 'Извините, я вас не поняла. Чтобы вернуться в главное меню, скажите: "Главное меню"'
+            tts = TEXTS['what_you_can_activities']
+            buttons = POSSIBILITIES_BUTTONS
+            card = WHAT_YOU_CAN_CARD
+            card['header'].update({'text': text})
+            self.result = Response('', buttons, card, session_state=4, tts=tts)
+
+        elif self.session_state == 10:
+            text = 'Извините, я вас не поняла. Чтобы вернуться в главное меню, скажите: "Главное меню"'
+            tts = TEXTS['what_you_can_statistic']
+            buttons = POSSIBILITIES_BUTTONS_STATISTIC
+            card = WHAT_YOU_CAN_CARD
+            card['header'].update({'text': text})
+            self.result = Response('', buttons, card, session_state=10, tts=tts)
 
         elif self.session_state == 7:
             self.get_daily_activities_card(weekly=True, error=1)
@@ -481,7 +506,7 @@ class DialogHandler:
         tts = (
             'Вы можете посмотреть подробную статистику "за сегодня", '
             '"общую статистику за сегодня", а также статистику за неделю. '
-            'Что именно вы хотите сделать?'
+            'Что именно Вы хотите сделать?'
         )
         card = STATISTIC_CARD
         buttons = STATISTIC_BUTTONS
@@ -492,7 +517,7 @@ class DialogHandler:
         today_date = self.get_time(return_timestamp=True)
         today_date = dt.strftime(today_date, '%Y-%m-%d 00:00:00')
         if not db.check_activity(self.__user_id, today_date):
-            text = 'Похоже, сегодня вы не закончили ни одной активности'
+            text = 'Похоже, сегодня Вы не закончили ни одной активности'
             tts = f'{text}. Хотите начать отслеживать новую активность, узнать статистику, или получить помощь?'
             buttons = MAIN_MENU_BUTTONS
             card = MAIN_MENU_CARD
@@ -503,8 +528,9 @@ class DialogHandler:
         text = ''
         activities_card, last_page = self.get_activities_card(0)
         buttons = STATISTIC_BUTTONS_ENTRIES
+        tts = 'Вот ваша статистика за сегодня.'
         if last_page:
-            self.result = Response('', buttons, activities_card, session_state=3)
+            self.result = Response('', buttons, activities_card, session_state=3, tts=tts)
             return
 
         self.result = Response(text, ENTRIES_BUTTONS_START, activities_card, session_state=31)
@@ -580,7 +606,6 @@ class DialogHandler:
             df['start_time'] = vectorized_slice(df['start_time'])
 
             dates = np.unique(df['start_time'])[:-1]
-            print(dates)
             days = []
             day_counter = 1
 
@@ -631,12 +656,12 @@ class DialogHandler:
             tts = 'Статистику за какой день Вы хотели бы увидеть?'
             if error:
                 text = (
-                    'Извините, я не поняла вас. Что именно вы хотите сделать?'
+                    'Извините, я не поняла вас. Что именно Вы хотите сделать?'
                 )
                 card['header'].update({'text': text})
                 tts = (
-                    'Извините, я не поняла вас. Если вы хотите вернуться в главное меню, '
-                    'скажите "Главное меню". Если вы хотите вернуться в раздел статистики, '
+                    'Извините, я не поняла вас. Если Вы хотите вернуться в главное меню, '
+                    'скажите "Главное меню". Если Вы хотите вернуться в раздел статистики, '
                     'скажите "Статистика"'
                 )
 
@@ -838,7 +863,7 @@ class DialogHandler:
 
         if activity_duration < 60:
             text = 'Извините, но продолжительность активности меньше минуты. ' \
-                   'Если вы завершите активность сейчас, то она не сохранится. ' \
+                   'Если Вы завершите активность сейчас, то она не сохранится. ' \
                    'Хотите завершить активность?'
             buttons = END_ACTIVITY
             self.result = Response(text, buttons, session_state=22)

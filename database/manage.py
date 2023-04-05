@@ -163,7 +163,6 @@ class DatabaseManager:
         for row in result_set[0].rows:
             activities_list.append(tuple(row.values()))
 
-        print(activities_list)
         return activities_list
 
     def select_activities_slice(self, user_id, start_slice, end_slice):
@@ -202,7 +201,6 @@ class DatabaseManager:
         params = {'$user_id': user_id, '$today_date': today_date}
         result_set = self.execute(query, params)
 
-        print(result_set[0].rows)
         if not result_set or not result_set[0].rows:
             return None
 

@@ -215,7 +215,10 @@ METRICS = {
         'no', 'quit', 'what_you_can', 'help', 'activities', 'statistic'
     },
 
-    'new_user': {'no', 'quit', 'start', 'yes'}
+    'new_user': {
+        'no', 'quit', 'start', 'yes', 'help', 'what_you_can',
+        'activities', 'statistic'
+    }
 }
 
 
@@ -227,7 +230,7 @@ def classify_command(tokens: list, metrics: list):
                 counter[metric] += 1
 
     counter = list(sorted(counter.items(), key=lambda x: x[1]))
-    print(counter)
+
     if counter[-1][1]:
         return counter[-1][0]
 
