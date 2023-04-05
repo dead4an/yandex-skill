@@ -381,6 +381,19 @@ class DialogHandler:
             card['header'].update({'text': text})
             self.result = Response('', buttons, card, session_state=10, tts=tts)
 
+        elif self.session_state in range(51, 55):
+            if self.session_state == 51:
+                self.help()
+
+            elif self.session_state == 52:
+                self.help(1)
+
+            elif self.session_state == 53:
+                self.help(2)
+
+            else:
+                self.help(3)
+
         elif self.session_state == 7:
             self.get_daily_activities_card(weekly=True, error=1)
 
