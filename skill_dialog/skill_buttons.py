@@ -414,6 +414,13 @@ MAIN_MENU_BUTTONS = [
 
 HELP_BUTTONS = [
     SKILL_BUTTONS['main_menu'],
+    SKILL_BUTTONS['what_you_can_continue'],
+    SKILL_BUTTONS['what_you_can']
+]
+
+HELP_BUTTONS_END = [
+    SKILL_BUTTONS['main_menu'],
+    SKILL_BUTTONS['what_you_can_repeat'],
     SKILL_BUTTONS['what_you_can']
 ]
 

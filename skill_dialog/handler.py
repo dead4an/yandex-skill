@@ -1,20 +1,19 @@
 import datetime
-import time
-from skill_requests.Response import Response
-from database.manage import DatabaseManager
-from .skill_texts import TEXTS
-from datetime import datetime as dt
-import pytz
 import random
+import time
+from datetime import datetime as dt
 from uuid import uuid4
-from .skill_buttons import (MAIN_MENU_BUTTONS, HELP_BUTTONS,
+import pytz
+from database.manage import DatabaseManager
+from skill_requests.Response import Response
+from .skill_buttons import (MAIN_MENU_BUTTONS, HELP_BUTTONS, HELP_BUTTONS_END,
                             ACTIVITY_TYPES, END_ACTIVITY, STATISTIC_BUTTONS, ENTRIES_BUTTONS_START,
                             ENTRIES_BUTTONS, ENTRIES_BUTTONS_END, STATISTIC_ACTIVITIES_CARD,
                             WHAT_YOU_CAN_CARD, POSSIBILITIES_BUTTONS, MAIN_MENU_CARD, HELLO_NEW_BUTTONS,
-                            ACTIVITIES_CARD, ABOUT_SKILL_CARD, ABOUT_ACTIVITIES_CARD, ABOUT_STATISTIC_CARD,
-                            DAILY_STATISTIC_CARD, STATISTIC_CARD, STATISTIC_BUTTONS_DAILY, STATISTIC_BUTTONS_WEEKLY,
-                            STATISTIC_BUTTONS_ENTRIES, HELP_ABOUT_STATISTIC, HELP_ABOUT_SKILL, HELP_ABOUT_ACTIVITIES,
-                            WEEKLY_STATISTIC_CARD, WEEKLY_VIEW_BUTTONS, POSSIBILITIES_BUTTONS_STATISTIC, HELP_CARD)
+                            ACTIVITIES_CARD, DAILY_STATISTIC_CARD, STATISTIC_CARD, STATISTIC_BUTTONS_DAILY,
+                            STATISTIC_BUTTONS_WEEKLY, STATISTIC_BUTTONS_ENTRIES, WEEKLY_STATISTIC_CARD,
+                            WEEKLY_VIEW_BUTTONS, POSSIBILITIES_BUTTONS_STATISTIC, HELP_CARD)
+from .skill_texts import TEXTS
 
 
 class DialogHandler:
@@ -40,7 +39,10 @@ class DialogHandler:
             if self.command is None:
                 self.new_session()
 
-            elif self.command in ['activities', 'start']:
+            elif self.command == 'start':
+                self.main_menu(new_session=True)
+
+            elif self.command == 'activities':
                 self.activities()
 
             elif self.command == 'statistic':
@@ -49,17 +51,39 @@ class DialogHandler:
             elif self.command == 'what_you_can':
                 self.about_possibilities()
 
+            elif self.command == 'help':
+                self.help()
+
+            elif self.command == 'back_to_menu':
+                self.main_menu(new_session=True)
+
         elif self.command is None:
             self.command_not_found()
             return
 
+        elif self.command == 'quit':
+            self.result = Response('Удачи!', end_session=True, tts='Удачи!')
+
+        elif self.command == 'help':
+            self.help()
+
+        elif self.command == 'what_you_can':
+            self.about_possibilities()
+
+        elif self.command == 'back_to_menu':
+            self.main_menu()
+
+        elif self.session_state == 0:
+            if self.command in ['no', 'quit']:
+                self.end_session()
+
+            else:
+                self.about_possibilities()
+
         # Главное меню
         elif self.session_state == 1:
-            if self.command == 'start':
-                self.main_menu(new_session=True)
-
-            elif self.command == 'quit':
-                self.result = Response('Удачи!', end_session=True, tts='Удачи!')
+            if self.command == 'quit':
+                self.end_session()
 
             elif self.command == 'help':
                 self.help()
@@ -84,7 +108,7 @@ class DialogHandler:
         # Раздел активностей
         elif self.session_state == 2:
             self.set_activity_name(self.command)
-            if self.command in ['back', 'back_to_menu']:
+            if self.command in ['back']:
                 self.main_menu()
                 return
 
@@ -140,7 +164,7 @@ class DialogHandler:
             elif self.command == 'get_weekly_statistic':
                 self.get_daily_activities_card(weekly=True)
 
-            elif self.command in ['back', 'back_to_menu']:
+            elif self.command in ['back']:
                 self.main_menu()
 
             elif self.command == 'activities':
@@ -154,6 +178,8 @@ class DialogHandler:
                       f'Если вам нужна помощь - скажите "Помощь".'
                 card = MAIN_MENU_CARD
                 card['header'].update({'text': text})
+                buttons = MAIN_MENU_BUTTONS
+                self.result = Response('', buttons, card, session_state=1, tts=tts)
 
             if self.command == 'entries_continue':
                 text = ''
@@ -180,7 +206,7 @@ class DialogHandler:
                 self.result = Response(text, ENTRIES_BUTTONS, activities_card,
                                        session_state=self.session_state - 1)
 
-            elif self.command in ['no', 'back_to_menu']:
+            elif self.command in ['no']:
                 self.main_menu()
 
             elif self.command == 'get_daily_statistic':
@@ -195,11 +221,8 @@ class DialogHandler:
             if self.command in ['yes', 'entries_continue']:
                 self.about_possibilities(pos_state=1)
 
-            elif self.command in ['no', 'back_to_menu']:
+            elif self.command in ['no']:
                 self.main_menu()
-
-            elif self.command == 'about_skill':
-                self.about_skill()
 
             elif self.command == 'activities':
                 self.activities()
@@ -214,11 +237,8 @@ class DialogHandler:
             if self.command in ['yes', 'entries_continue', 'repeat']:
                 self.about_possibilities()
 
-            elif self.command in ['no', 'back_to_menu']:
+            elif self.command in ['no']:
                 self.main_menu()
-
-            elif self.command == 'about_skill':
-                self.about_skill()
 
             elif self.command == 'activities':
                 self.activities()
@@ -230,39 +250,31 @@ class DialogHandler:
                 self.help()
 
         # Помощь
-        elif self.session_state == 5 or self.command in range(51, 54):
-            if self.command in ['back', 'back_to_menu']:
+        elif self.session_state in range(51, 55):
+            if self.command in ['back', 'no']:
                 self.main_menu()
-                return
 
-            if self.session_state == 5:
-                if self.command in ['yes', 'entries_continue']:
-                    self.help(help_state=1)
+            elif self.command == 'activities':
+                self.activities()
+
+            elif self.command == 'statistic':
+                self.statistic()
 
             elif self.session_state == 51:
                 if self.command in ['yes', 'entries_continue']:
-                    self.help(help_state=2)
+                    self.help(help_state=1)
 
             elif self.session_state == 52:
                 if self.command in ['yes', 'entries_continue']:
-                    self.help(help_state=3)
+                    self.help(help_state=2)
 
             elif self.session_state == 53:
                 if self.command in ['yes', 'entries_continue']:
-                    self.help()
+                    self.help(help_state=3)
 
-        # Раздел помощи (зацикленный + выход в меню)
-        elif self.session_state == 6:
-            if self.command == 'about_skill':
-                self.about_skill()
-            elif self.command == 'about_activities':
-                self.about_activities()
-            elif self.command == 'about_statistic':
-                self.about_statistic()
-            elif self.command in 'back' or 'back_to_menu':
-                self.main_menu()
-            elif self.command == 'what_you_can':
-                self.about_possibilities()
+            elif self.session_state == 54:
+                if self.command in ['yes', 'entries_continue', 'repeat']:
+                    self.help()
 
         # Статистика за день
         elif self.session_state == 7:
@@ -308,10 +320,6 @@ class DialogHandler:
                 self.statistic()
                 return
 
-            elif self.command == 'back_to_menu':
-                self.main_menu()
-                return
-
             card = DAILY_STATISTIC_CARD
             card.update({'items': activities_cards})
             card['header'].update({'text': 'Вот ваша статистика за этот день'})
@@ -325,8 +333,9 @@ class DialogHandler:
             if self.command == 'back':
                 self.get_daily_activities_card(weekly=True)
 
-            elif self.command == 'back_to_menu':
-                self.main_menu()
+    def end_session(self):
+        text = 'Удачи!'
+        self.result = Response(text, end_session=True, tts=text)
 
     def command_not_found(self):
         """ Команда не найдена """
@@ -384,7 +393,7 @@ class DialogHandler:
         else:
             text = TEXTS['hello_new']
             buttons = HELLO_NEW_BUTTONS
-            self.result = Response(text, buttons, session_state=1)
+            self.result = Response(text, buttons, session_state=0)
 
     # Меню
     def main_menu(self, new_session=False):
@@ -865,7 +874,7 @@ class DialogHandler:
                 'хотите начать отслеживать. Навык запомнит время начала активности, а также её вид.'
                 'Продолжить?'
             )
-            self.result = Response('', buttons, card, session_state=5, tts=tts)
+            self.result = Response('', buttons, card, session_state=51, tts=tts)
 
         elif help_state == 1:
             tts = (
@@ -874,7 +883,7 @@ class DialogHandler:
                 'завершение активности. Чтобы завершить, скажите: "Завершить". '
                 'Чтобы отменить завершение, скажите: "Отменить". Продолжить?'
             )
-            self.result = Response('', buttons, card, session_state=51, tts=tts)
+            self.result = Response('', buttons, card, session_state=52, tts=tts)
 
         elif help_state == 2:
             tts = (
@@ -882,40 +891,16 @@ class DialogHandler:
                 'записи о всех активностях, в разделе статистики скажите "Подробная статистика". '
                 'Для получения общей статистики за этот день, скажите: "Сегодня". Продолжить?'
             )
-            self.result = Response('', buttons, card, session_state=52, tts=tts)
+            self.result = Response('', buttons, card, session_state=53, tts=tts)
 
         else:
+            buttons = HELP_BUTTONS_END
             tts = (
                 'Чтобы узнать свою статистику за предыдущие дни, перейдите в раздел статистики, '
                 'сказав: "Статистика". Далее скажите: "Статистика за неделю" и выберите день, '
-                'статистику за который Вы хотите узнать. Продолжить?'
+                'статистику за который Вы хотите узнать. Хотите, чтобы я повторила?'
             )
-            self.result = Response('', buttons, card, session_state=53, tts=tts)
-
-    def about_skill(self):
-        tts = (
-            'Этот навык призван помочь Вам следить за тем, как Вы распределяете своё время. Если Вы активная '
-            'личность, дорожащая каждой минутой и желающая оценить свои временн+ые затраты - Контроль Времени '
-            'обязательно поможет Вам в этом деле. В разделе "Активности" Вы сможете делать отметки о начале и конце '
-            'ваших активностей, а раздел "Статистика" предоставит Вам краткую информацию о Ваших активностях в виде '
-            'записей. Скажите, если хотите узнать подробнее о статистике и активностях. Или же '
-            'вернёмся в главное меню?'
-        )
-        buttons = HELP_ABOUT_SKILL
-        card = ABOUT_SKILL_CARD
-        self.result = Response('', buttons, card, session_state=6, tts=tts)
-
-    def about_activities(self):
-        text = TEXTS['about_activities']
-        buttons = HELP_ABOUT_ACTIVITIES
-        card = ABOUT_ACTIVITIES_CARD
-        self.result = Response('', buttons, card, session_state=6, tts=text)
-
-    def about_statistic(self):
-        text = TEXTS['about_statistic']
-        buttons = HELP_ABOUT_STATISTIC
-        card = ABOUT_STATISTIC_CARD
-        self.result = Response('', buttons, card, session_state=6, tts=text)
+            self.result = Response('', buttons, card, session_state=54, tts=tts)
 
     def get_time(self, str_time=None, return_timestamp=False, timestamp=None):
         """ Возвращает текущее время, либо преобразует str в timestamp """

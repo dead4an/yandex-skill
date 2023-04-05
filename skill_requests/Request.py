@@ -25,7 +25,10 @@ class Request:
         """ Инициализирует команду пользователя """
         nlu_tokens = self.request['request']['nlu']['tokens']
         if self.session_is_new:
-            self.command = classify_command(nlu_tokens, METRICS['main_menu'])
+            self.command = classify_command(nlu_tokens, METRICS['main_menu_new_session'])
+
+        if self.session_state == 0:
+            self.command = classify_command(nlu_tokens, METRICS['new_user'])
 
         if self.session_state == 1:
             self.command = classify_command(nlu_tokens, METRICS['main_menu'])
@@ -39,7 +42,7 @@ class Request:
         elif self.session_state == 3:
             self.command = classify_command(nlu_tokens, METRICS['statistic'])
 
-        elif self.session_state >= 31:
+        elif 31 <= self.session_state <= 50:
             self.command = classify_command(nlu_tokens, METRICS['entries_view'])
 
         elif self.session_state == 4:
@@ -48,8 +51,11 @@ class Request:
         elif self.session_state == 10:
             self.command = classify_command(nlu_tokens, METRICS['what_you_can_repeat'])
 
-        elif self.session_state == 5:
+        elif self.session_state in range(51, 54):
             self.command = classify_command(nlu_tokens, METRICS['help'])
+
+        elif self.session_state == 54:
+            self.command = classify_command(nlu_tokens, METRICS['help_repeat'])
 
         elif self.session_state == 6:
             self.command = classify_command(nlu_tokens, METRICS['help'])
@@ -59,7 +65,7 @@ class Request:
 
         elif self.session_state == 8:
             self.command = classify_command(nlu_tokens, METRICS['weekly_view_day'])
-
+        print(self.command)
     def get_user_id(self):
         """ Возвращает id пользователя """
         return self.user_id
