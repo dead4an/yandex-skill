@@ -164,3 +164,8 @@ cython_debug/
 # Sqlite files
 *.db
 .vercel
+
+.run
+.run/
+.run/*
+
